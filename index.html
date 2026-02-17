@@ -1,0 +1,171 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurus Certification Tracker Pro - GitHub Live</title>
+<style>
+    /* ... (Keeping your existing professional styles) ... */
+    :root { --excel-green: #217346; --bg-color: #f4f7f6; --text-dark: #2c3e50; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); padding: 40px; }
+    .stat-box { background: #fff; padding: 10px 18px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-weight: bold; border-left: 5px solid #3498db; }
+    .header-container { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+    .main-btn { background: #3498db; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    #adminSaveBtn { background: #2ecc71; display: none; }
+    #autosaveIndicator { font-size: 12px; color: #27ae60; font-weight: bold; opacity: 0; transition: 0.3s; margin-left: 10px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; min-width: 1200px; }
+    th, td { border: 1px solid #bdc3c7; padding: 8px; text-align: center; }
+    th { background: #34495e; color: #fff; position: sticky; top: 0; }
+    #toast { visibility: hidden; min-width: 250px; background: #333; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 2000; }
+    #toast.show { visibility: visible; opacity: 1; }
+    .status-done { background: #00c875 !important; color: #fff; }
+    .status-working { background: #fdab3d !important; color: #fff; }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="header-container">
+  <div>
+    <h1>Aurus Certification Tracker (GitHub Live)</h1>
+    <div class="dashboard" style="display:flex; gap:10px; align-items:center;">
+      <div class="stat-box">📊 Total: <span id="statTotal">0</span></div>
+      <div class="stat-box">✅ Done: <span id="statComp">0</span></div>
+      <span id="autosaveIndicator">☁️ GitHub Synced</span>
+    </div>
+  </div>
+  <div class="controls" style="display:flex; gap:10px;">
+    <button id="adminSaveBtn" class="main-btn" onclick="commitToGitHub()">🚀 Commit to GitHub</button>
+    <button id="adminBtn" class="main-btn" onclick="toggleAdmin()">🔒 Admin Mode</button>
+  </div>
+</div>
+
+<div style="overflow-x:auto; background:#fff; border-radius:8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
+    <table id="mainTable">
+        <thead><tr id="headerRow"></tr></thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+
+<script>
+// --- GITHUB CONFIG ---
+const GH_CONFIG = {
+    token: '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', 
+    owner: 'Studnit',                   
+    repo: 'monday.com',
+    path: 'data.json'
+};
+
+let DATA = [];
+let HEADERS = ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer Name"];
+let admin = false;
+let autosaveTimer;
+
+// --- GITHUB API LOGIC ---
+
+
+async function loadDataFromGitHub() {
+    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
+    try {
+        const res = await fetch(url, { headers: { 'Authorization': `token ${GH_CONFIG.token}` } });
+        const json = await res.json();
+        DATA = JSON.parse(atob(json.content)); // Decode Base64
+        renderBodies();
+        showToast("✅ Data loaded from GitHub");
+    } catch (e) {
+        showToast("⚠️ Could not load GitHub data. Check Config.", "error");
+    }
+}
+
+async function commitToGitHub(isAutosave = false) {
+    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
+    
+    try {
+        // 1. Get current file SHA
+        const res = await fetch(url, { headers: { 'Authorization': `token ${GH_CONFIG.token}` } });
+        const fileData = await res.json();
+        
+        // 2. Push Update
+        const updateRes = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${GH_CONFIG.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: isAutosave ? "Autosave commit" : "Manual commit by Admin",
+                content: btoa(JSON.stringify(DATA, null, 2)),
+                sha: fileData.sha
+            })
+        });
+
+        if(updateRes.ok) {
+            if(isAutosave) {
+                document.getElementById("autosaveIndicator").style.opacity = "1";
+                setTimeout(() => document.getElementById("autosaveIndicator").style.opacity = "0", 1500);
+            } else {
+                showToast("🚀 Committed successfully to GitHub!");
+            }
+        }
+    } catch (e) {
+        showToast("❌ GitHub Sync Failed", "error");
+    }
+}
+
+// --- UI LOGIC ---
+function toggleAdmin() {
+    if(!admin) {
+        if(prompt("Admin Password:") !== "admin123") return;
+        admin = true;
+        document.getElementById("adminBtn").innerText = "🔓 Exit Admin";
+        document.getElementById("adminSaveBtn").style.display = "block";
+    } else {
+        admin = false;
+        document.getElementById("adminBtn").innerText = "🔒 Admin Mode";
+        document.getElementById("adminSaveBtn").style.display = "none";
+    }
+    renderBodies();
+}
+
+function renderBodies() {
+    const tbody = document.getElementById("tableBody");
+    const hrow = document.getElementById("headerRow");
+    
+    hrow.innerHTML = HEADERS.map(h => `<th>${h}</th>`).join('');
+    tbody.innerHTML = DATA.map((row, rIdx) => `
+        <tr>
+            ${row.map((cell, cIdx) => {
+                let isStatus = cIdx === 5;
+                let cls = isStatus && cell === "Done" ? "status-done" : (isStatus ? "status-working" : "");
+                return `<td class="${cls}" contenteditable="${admin && !isStatus}" oninput="updateCell(${rIdx}, ${cIdx}, this.innerText)">${cell}</td>`;
+            }).join('')}
+        </tr>
+    `).join('');
+    updateStats();
+}
+
+function updateCell(rIdx, cIdx, val) {
+    DATA[rIdx][cIdx] = val;
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => commitToGitHub(true), 2000);
+}
+
+function updateStats() {
+    document.getElementById("statTotal").innerText = DATA.length;
+    document.getElementById("statComp").innerText = DATA.filter(r => r[5] === "Done").length;
+}
+
+function showToast(msg, type="success") {
+    const t = document.getElementById("toast");
+    t.innerText = msg; t.style.background = type === "success" ? "#27ae60" : "#e74c3c";
+    t.className = "show"; setTimeout(() => t.className = "", 3000);
+}
+
+// Initial Load
+window.onload = loadDataFromGitHub;
+</script>
+</body>
+</html>
