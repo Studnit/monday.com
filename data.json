@@ -1,5 +1,5 @@
 {
-  "headers": ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer Name", "Team Lead Name", "Last Week", "9–13 Feb"],
+  "headers": ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer Name", "Team Lead Name", "Weekly Status", "Weekly Status 9–13 Feb"],
   "data": [
     ["1","EP-0128","Chase ISO Wiseasy R1 PTS V6 [04157999]","21/09/25","17/02/26","Working on it","Sakshi Gudmewar","Vrushabh Munde","YES","YES"],
     ["2","EP-0132","Flexa Wallet Instore Customer Presented Code","15/11/25","20/02/26","Working on it","Naga Mani Gatti","Harshal Chaudhari","YES","YES"],
