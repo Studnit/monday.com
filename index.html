@@ -1,109 +1,166 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurus Certification Tracker Pro - GitHub Live</title>
+<title>Aurus Certification Tracker Pro - Live Sync</title>
 <style>
-    /* ... (Keeping your existing professional styles) ... */
-    :root { --excel-green: #217346; --bg-color: #f4f7f6; --text-dark: #2c3e50; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); padding: 40px; }
-    .stat-box { background: #fff; padding: 10px 18px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-weight: bold; border-left: 5px solid #3498db; }
-    .header-container { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
-    .main-btn { background: #3498db; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    #adminSaveBtn { background: #2ecc71; display: none; }
-    #autosaveIndicator { font-size: 12px; color: #27ae60; font-weight: bold; opacity: 0; transition: 0.3s; margin-left: 10px; }
-    table { width: 100%; border-collapse: collapse; background: #fff; min-width: 1200px; }
-    th, td { border: 1px solid #bdc3c7; padding: 8px; text-align: center; }
-    th { background: #34495e; color: #fff; position: sticky; top: 0; }
-    #toast { visibility: hidden; min-width: 250px; background: #333; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 2000; }
-    #toast.show { visibility: visible; opacity: 1; }
-    .status-done { background: #00c875 !important; color: #fff; }
-    .status-working { background: #fdab3d !important; color: #fff; }
+:root {
+  --excel-green: #217346;
+  --bg-color: #f4f7f6;
+  --text-dark: #2c3e50;
+  --border-color: #bdc3c7;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-color); margin: 0; padding: 20px 20px 40px 40px;
+}
+
+h1 { margin: 0; color: var(--text-dark); }
+.section-title {
+  color: #2c3e50; margin-top: 30px; margin-bottom: 10px; font-size: 20px; display: flex; align-items: center; gap: 10px;
+}
+
+/* DASHBOARD STYLE */
+.header-container { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+.dashboard { display: flex; gap: 15px; margin-top: 12px; align-items: center; }
+.stat-box {
+  background: #fff; padding: 10px 18px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-size: 14px; font-weight: bold; color: var(--text-dark); border-left: 5px solid #3498db;
+}
+.stat-box:nth-child(2) { border-left-color: #00c875; } 
+.stat-box:nth-child(3) { border-left-color: #fdab3d; } 
+
+#autosaveIndicator { font-size: 12px; color: #27ae60; font-weight: bold; opacity: 0; transition: 0.3s; margin-left: 10px; }
+#lastSynced { font-size: 11px; color: #7f8c8d; margin-left: 10px; }
+
+/* CONTROLS */
+.controls { display: flex; gap: 10px; align-items: center; }
+#searchInput { padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; width: 200px; outline: none; font-size: 14px; }
+.main-btn {
+  background: #3498db; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;
+}
+.main-btn:hover { filter: brightness(1.1); }
+#adminSaveBtn { background: #2ecc71; display: none; }
+
+/* TABLES */
+.table-wrapper { overflow-x: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border-radius: 8px; background: #fff; max-height: 55vh; margin-bottom: 20px; }
+table { width: 100%; border-collapse: collapse; background: #fff; min-width: 1400px; }
+th, td { border: 1px solid var(--border-color); padding: 10px; font-size: 13px; text-align: center; white-space: nowrap; }
+th { position: sticky; color: #fff; font-size: 14px; background: #34495e; top: 0; z-index: 3; }
+
+/* STATUS HIGHLIGHTS */
+.status-working { background: #fdab3d !important; color: #fff !important; font-weight: bold; }
+.status-done { background: #00c875 !important; color: #fff !important; font-weight: bold; }
+.status-stuck { background: #e2445c !important; color: #fff !important; font-weight: bold; }
+
+/* TOAST NOTIFICATION */
+#toast {
+  visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 2000; left: 50%; bottom: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s;
+}
+#toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+
+/* CONTEXT MENU */
+.context-menu {
+  position: absolute; background: #fff; border: 1px solid var(--border-color); box-shadow: 2px 4px 12px rgba(0,0,0,0.2);
+  z-index: 10000; border-radius: 6px; padding: 8px 0; min-width: 180px; list-style: none; margin: 0; display: none;
+}
+.context-menu li { padding: 8px 20px; font-size: 13px; cursor: pointer; color: #2c3e50; }
+.context-menu li:hover { background: #f4f7f6; color: #3498db; }
 </style>
 </head>
 <body>
 
-<div id="toast"></div>
+<div id="toast">Notification</div>
+
+<ul id="contextMenu" class="context-menu">
+  <li onclick="addRowContext()">➕ Add New Row</li>
+  <li onclick="deleteRowContext()" style="color:red">🗑️ Delete Row</li>
+  <li onclick="moveRowContext(-1)">🔼 Move Row Up</li>
+  <li onclick="moveRowContext(1)">🔽 Move Row Down</li>
+</ul>
 
 <div class="header-container">
   <div>
-    <h1>Aurus Certification Tracker (GitHub Live)</h1>
-    <div class="dashboard" style="display:flex; gap:10px; align-items:center;">
+    <h1>Aurus Certification Tracker</h1>
+    <div class="dashboard">
       <div class="stat-box">📊 Total: <span id="statTotal">0</span></div>
       <div class="stat-box">✅ Done: <span id="statComp">0</span></div>
-      <span id="autosaveIndicator">☁️ GitHub Synced</span>
+      <span id="autosaveIndicator">☁️ Syncing to GitHub...</span>
+      <span id="lastSynced"></span>
     </div>
   </div>
-  <div class="controls" style="display:flex; gap:10px;">
-    <button id="adminSaveBtn" class="main-btn" onclick="commitToGitHub()">🚀 Commit to GitHub</button>
-    <button id="adminBtn" class="main-btn" onclick="toggleAdmin()">🔒 Admin Mode</button>
+  <div class="controls">
+    <button id="adminSaveBtn" class="main-btn" onclick="saveToGitHub()">🚀 Commit to GitHub</button>
+    <button class="main-btn" style="background:var(--excel-green)" onclick="exportCSV()">📤 Export CSV</button>
+    <input type="text" id="searchInput" placeholder="🔍 Global Search..." oninput="renderBodies()">
+    <button id="adminBtn" class="main-btn" onclick="toggleAdmin()">🔒 Enable Admin Mode</button>
   </div>
 </div>
 
-<div style="overflow-x:auto; background:#fff; border-radius:8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
-    <table id="mainTable">
-        <thead><tr id="headerRow"></tr></thead>
-        <tbody id="tableBody"></tbody>
-    </table>
-</div>
+<h2 class="section-title">⏳ In-Progress Projects</h2>
+<div class="table-wrapper"><table id="table1"><thead><tr id="h1"></tr></thead><tbody id="tb1"></tbody></table></div>
+
+<h2 class="section-title">✅ Completed Projects</h2>
+<div class="table-wrapper"><table id="table2"><thead><tr id="h2"></tr></thead><tbody id="tb2"></tbody></table></div>
 
 <script>
-// --- GITHUB CONFIG ---
+// --- CONFIGURATION ---
 const GH_CONFIG = {
-    token: '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', 
-    owner: 'Studnit',                   
+    owner: 'Studnit',
     repo: 'monday.com',
     path: 'data.json'
 };
 
+// --- OPTION 1: HARD-CODED TOKEN FOR ADMIN WRITE ACCESS ---
+let GITHUB_TOKEN = "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"; 
+
 let DATA = [];
-let HEADERS = ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer Name"];
-let admin = false;
-let autosaveTimer;
+let HEADERS = ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer Name", "Team Lead Name", "Last Week", "9–13 Feb"];
+let admin = false, activeRow = null, autosaveTimer = null;
 
-// --- GITHUB API LOGIC ---
-
-
-async function loadDataFromGitHub() {
+// 1. GITHUB API LOGIC
+async function loadFromGitHub() {
     const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
     try {
-        const res = await fetch(url, { headers: { 'Authorization': `token ${GH_CONFIG.token}` } });
+        const res = await fetch(url);
+        if(!res.ok) throw new Error();
         const json = await res.json();
-        DATA = JSON.parse(atob(json.content)); // Decode Base64
-        renderBodies();
-        showToast("✅ Data loaded from GitHub");
+        const content = JSON.parse(atob(json.content));
+        
+        DATA = content.data || [];
+        if(content.headers) HEADERS = content.headers;
+        
+        renderHeaders(); renderBodies();
+        showToast("✅ Live Data Connected");
     } catch (e) {
-        showToast("⚠️ Could not load GitHub data. Check Config.", "error");
+        showToast("⚠️ Repository file not found. Ensure data.json exists.", "error");
+        renderHeaders(); renderBodies();
     }
 }
 
-async function commitToGitHub(isAutosave = false) {
+async function saveToGitHub(isAutosave = false) {
+    if (!admin || !GITHUB_TOKEN) return;
+
     const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
-    
     try {
-        // 1. Get current file SHA
-        const res = await fetch(url, { headers: { 'Authorization': `token ${GH_CONFIG.token}` } });
+        const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
         const fileData = await res.json();
         
-        // 2. Push Update
-        const updateRes = await fetch(url, {
+        const payload = { headers: HEADERS, data: DATA };
+        const update = await fetch(url, {
             method: 'PUT',
-            headers: {
-                'Authorization': `token ${GH_CONFIG.token}`,
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                message: isAutosave ? "Autosave commit" : "Manual commit by Admin",
-                content: btoa(JSON.stringify(DATA, null, 2)),
+                message: isAutosave ? "Autosave update" : "Manual Commit Operation",
+                content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
                 sha: fileData.sha
             })
         });
 
-        if(updateRes.ok) {
-            if(isAutosave) {
+        if (update.ok) {
+            document.getElementById("lastSynced").innerText = "Last commit: " + new Date().toLocaleTimeString();
+            if (isAutosave) {
                 document.getElementById("autosaveIndicator").style.opacity = "1";
                 setTimeout(() => document.getElementById("autosaveIndicator").style.opacity = "0", 1500);
             } else {
@@ -111,51 +168,107 @@ async function commitToGitHub(isAutosave = false) {
             }
         }
     } catch (e) {
-        showToast("❌ GitHub Sync Failed", "error");
+        showToast("❌ GitHub Token Error - Check repo permissions", "error");
     }
 }
 
-// --- UI LOGIC ---
-function toggleAdmin() {
-    if(!admin) {
-        if(prompt("Admin Password:") !== "admin123") return;
-        admin = true;
-        document.getElementById("adminBtn").innerText = "🔓 Exit Admin";
-        document.getElementById("adminSaveBtn").style.display = "block";
-    } else {
-        admin = false;
-        document.getElementById("adminBtn").innerText = "🔒 Admin Mode";
-        document.getElementById("adminSaveBtn").style.display = "none";
-    }
-    renderBodies();
+// 2. UI & RENDERING
+function renderHeaders() {
+    const html = HEADERS.map(h => `<th>${h}</th>`).join('');
+    document.getElementById("h1").innerHTML = html;
+    document.getElementById("h2").innerHTML = html;
 }
 
 function renderBodies() {
-    const tbody = document.getElementById("tableBody");
-    const hrow = document.getElementById("headerRow");
+    const tb1 = document.getElementById("tb1"), tb2 = document.getElementById("tb2");
+    const q = document.getElementById("searchInput").value.toLowerCase();
+    tb1.innerHTML = ""; tb2.innerHTML = "";
     
-    hrow.innerHTML = HEADERS.map(h => `<th>${h}</th>`).join('');
-    tbody.innerHTML = DATA.map((row, rIdx) => `
-        <tr>
-            ${row.map((cell, cIdx) => {
-                let isStatus = cIdx === 5;
-                let cls = isStatus && cell === "Done" ? "status-done" : (isStatus ? "status-working" : "");
-                return `<td class="${cls}" contenteditable="${admin && !isStatus}" oninput="updateCell(${rIdx}, ${cIdx}, this.innerText)">${cell}</td>`;
-            }).join('')}
-        </tr>
-    `).join('');
-    updateStats();
+    let compCount = 0;
+    DATA.forEach((r, idx) => {
+        if(q && !r.join(' ').toLowerCase().includes(q)) return;
+        
+        const status = (r[5] || "").toUpperCase();
+        const isDone = status === "DONE";
+        if(isDone) compCount++;
+
+        const tr = document.createElement("tr");
+        tr.dataset.index = idx;
+        tr.innerHTML = r.map((cell, cIdx) => {
+            let cls = "";
+            if(cIdx === 5) {
+                if(status === "DONE") cls = "status-done";
+                else if(status === "STUCK") cls = "status-stuck";
+                else cls = "status-working";
+            }
+            return `<td ${admin ? 'contenteditable="true"' : ''} class="${cls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
+        }).join('');
+        
+        if(isDone) tb2.appendChild(tr); else tb1.appendChild(tr);
+    });
+    document.getElementById("statTotal").innerText = DATA.length;
+    document.getElementById("statComp").innerText = compCount;
 }
 
 function updateCell(rIdx, cIdx, val) {
     DATA[rIdx][cIdx] = val;
+    if(cIdx === 5) renderBodies();
     clearTimeout(autosaveTimer);
-    autosaveTimer = setTimeout(() => commitToGitHub(true), 2000);
+    autosaveTimer = setTimeout(() => saveToGitHub(true), 2000);
 }
 
-function updateStats() {
-    document.getElementById("statTotal").innerText = DATA.length;
-    document.getElementById("statComp").innerText = DATA.filter(r => r[5] === "Done").length;
+function toggleAdmin() {
+    if(!admin) {
+        if(prompt("Admin Password:") !== "admin123") return showToast("Access Denied", "error");
+        admin = true;
+        document.getElementById("adminBtn").innerText = "🔓 Exit Admin Mode";
+        document.getElementById("adminSaveBtn").style.display = "block";
+        showToast("Write Access Granted");
+    } else {
+        admin = false;
+        document.getElementById("adminBtn").innerText = "🔒 Enable Admin Mode";
+        document.getElementById("adminSaveBtn").style.display = "none";
+        showToast("Read-Only Mode");
+    }
+    renderBodies();
+}
+
+// 3. RIGHT CLICK ACTIONS
+document.addEventListener('contextmenu', e => {
+    if(!admin) return;
+    const td = e.target.closest('td');
+    if(td) {
+        e.preventDefault();
+        const menu = document.getElementById("contextMenu");
+        menu.style.display = "block";
+        menu.style.left = e.pageX + "px"; menu.style.top = e.pageY + "px";
+        activeRow = td.parentElement;
+    }
+});
+document.addEventListener('click', () => document.getElementById("contextMenu").style.display = "none");
+
+function addRowContext() {
+    DATA.push(Array(HEADERS.length).fill(""));
+    showToast("➕ Row Added");
+    renderBodies(); saveToGitHub(true);
+}
+
+function deleteRowContext() {
+    if(confirm("Permanently delete this row?")) {
+        DATA.splice(parseInt(activeRow.dataset.index), 1);
+        showToast("🗑️ Row Deleted", "error");
+        renderBodies(); saveToGitHub(true);
+    }
+}
+
+function moveRowContext(dir) {
+    const idx = parseInt(activeRow.dataset.index);
+    const target = idx + dir;
+    if(target >= 0 && target < DATA.length) {
+        [DATA[idx], DATA[target]] = [DATA[target], DATA[idx]];
+        renderBodies(); saveToGitHub(true);
+        showToast("↕️ Row Reordered");
+    }
 }
 
 function showToast(msg, type="success") {
@@ -164,8 +277,15 @@ function showToast(msg, type="success") {
     t.className = "show"; setTimeout(() => t.className = "", 3000);
 }
 
-// Initial Load
-window.onload = loadDataFromGitHub;
+function exportCSV() {
+    let csv = HEADERS.join(",") + "\n" + DATA.map(r => r.join(",")).join("\n");
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'AurusTracker_Backup.csv'; a.click();
+    showToast("📊 Backup CSV Downloaded");
+}
+
+window.onload = loadFromGitHub;
 </script>
 </body>
 </html>
