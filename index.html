@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurus Tracker Pro | Team Management</title>
+<title>Aurus Tracker Pro | Status-Based Tables</title>
 <style>
 :root { --excel-green: #217346; --bg: #f0f2f5; --text: #1a202c; --border: #e2e8f0; }
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
@@ -12,54 +12,36 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; pa
 .header-container { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
 #liveClock { font-weight: 700; color: #4a5568; background: #edf2f7; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
 
-/* TEAM MANAGER PANEL */
-#teamManager { display: none; background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-top: 5px solid var(--excel-green); }
-.name-pill { display: inline-block; background: #edf2f7; padding: 5px 12px; border-radius: 15px; margin: 5px; font-size: 12px; font-weight: bold; }
-.remove-name { margin-left: 8px; color: #e53e3e; cursor: pointer; }
-
-/* TABLES */
+/* STATUS SECTIONS */
 .status-section { background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; }
 .section-header { padding: 12px 20px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; font-size: 14px; }
-.bg-working { background: #3182ce; } .bg-done { background: var(--excel-green); }
+.bg-working { background: #3182ce; } .bg-done { background: var(--excel-green); } .bg-stuck { background: #e53e3e; }
 
-.table-wrapper { overflow-x: auto; max-height: 45vh; }
+/* EXCEL GRID STYLING */
+.table-wrapper { overflow-x: auto; max-height: 40vh; }
 table { width: 100%; border-collapse: collapse; min-width: 1400px; }
 th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; padding: 12px; border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 10; }
 td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; text-align: center; }
+td:focus { outline: 2px solid var(--excel-green); background: #f0fff4; }
 
-/* AUTOCOMPLETE */
-.suggestion-box { position: absolute; background: white; border: 1px solid #cbd5e0; z-index: 5000; max-height: 150px; overflow-y: auto; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-radius: 6px; min-width: 200px; list-style: none; padding: 0; margin: 0; text-align: left; }
-.suggestion-box li { padding: 8px 15px; cursor: pointer; font-size: 12px; border-bottom: 1px solid #edf2f7; }
-.suggestion-box li:hover { background: #ebf8ff; color: #3182ce; }
-
-.btn { padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
-.btn-admin { background: #2d3748; color: #fff; }
-.btn-save { background: var(--excel-green); color: #fff; }
+/* FORM ELEMENTS */
+input[type="date"], select { padding: 5px; border-radius: 4px; border: 1px solid #ddd; width: 90%; font-family: inherit; }
+.btn-admin { background: #2d3748; color: #fff; padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
 </style>
 </head>
 <body>
 
 <div class="header-container">
   <div>
-    <h1>Aurus Certification <span style="color:var(--excel-green)">Tracker</span></h1>
+    <h1 style="margin:0; font-size: 22px;">Aurus Certification <span style="color:var(--excel-green)">Tracker</span></h1>
     <div style="display:flex; gap:15px; margin-top:5px; align-items:center;">
         <div id="liveClock">Loading Clock...</div>
         <div id="syncStatus" style="font-size:11px; font-weight:bold; color:#718096;">Sync: Ready</div>
     </div>
   </div>
-  <div style="display:flex; gap:10px;">
-    <button id="manageNamesBtn" class="btn btn-save" style="display:none;" onclick="toggleTeamManager()">👥 Manage Team</button>
-    <button id="adminBtn" class="btn btn-admin" onclick="toggleAdmin()">🔒 Admin Mode</button>
+  <div>
+    <button id="adminBtn" class="btn-admin" onclick="toggleAdmin()">🔒 Admin Login</button>
   </div>
-</div>
-
-<div id="teamManager">
-    <h3 style="margin-top:0;">Manage Team Members</h3>
-    <div style="margin-bottom:15px;">
-        <input type="text" id="newNameInput" placeholder="New Member Name..." style="padding:8px; border:1px solid #ddd; border-radius:5px; width:250px;">
-        <button class="btn btn-save" onclick="addNewName()">Add Member</button>
-    </div>
-    <div id="namesContainer"></div>
 </div>
 
 <div class="status-section">
@@ -72,9 +54,14 @@ td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; text-alig
     <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-done"></tbody></table></div>
 </div>
 
+<div class="status-section">
+    <div class="section-header bg-stuck"><span>🛑 STUCK / YET TO START</span><span id="countStuck">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-stuck"></tbody></table></div>
+</div>
+
 <script>
 const GH_CONFIG = { owner: 'Studnit', repo: 'monday.com', dataPath: 'data.json', namePath: 'name.json' };
-const GITHUB_TOKEN = "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"; 
+const GITHUB_TOKEN = "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";  // Update with your token
 
 let DATA = [];
 let TEAM_NAMES = []; 
@@ -88,138 +75,73 @@ function startClock() {
 }
 
 async function loadInitialData() {
+    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
     try {
-        const nameUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`;
-        const nameRes = await fetch(nameUrl);
-        const nameJson = await nameRes.json();
-        TEAM_NAMES = JSON.parse(atob(nameJson.content));
-        renderTeamManager();
-
-        const dataUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
-        const dataRes = await fetch(dataUrl);
-        const dataJson = await dataRes.json();
-        const content = JSON.parse(atob(dataJson.content));
+        const res = await fetch(url);
+        const json = await res.json();
+        const content = JSON.parse(atob(json.content));
         DATA = content.data || [];
-        
         renderHeaders(); renderBodies();
-    } catch (e) { console.error("Load failed", e); }
+    } catch (e) { console.error("Sync failed"); }
 }
 
-// --- TEAM MANAGEMENT ---
-function renderTeamManager() {
-    const container = document.getElementById("namesContainer");
-    container.innerHTML = TEAM_NAMES.map((name, idx) => `
-        <span class="name-pill">${name} <span class="remove-name" onclick="removeName(${idx})">✖</span></span>
-    `).join('');
-}
-
-function toggleTeamManager() {
-    const panel = document.getElementById("teamManager");
-    panel.style.display = panel.style.display === "none" ? "block" : "none";
-}
-
-function addNewName() {
-    const input = document.getElementById("newNameInput");
-    const name = input.value.trim();
-    if(name && !TEAM_NAMES.includes(name)) {
-        TEAM_NAMES.push(name);
-        TEAM_NAMES.sort();
-        input.value = "";
-        renderTeamManager();
-        saveNamesToGitHub();
-    }
-}
-
-function removeName(idx) {
-    if(confirm(`Remove ${TEAM_NAMES[idx]}?`)) {
-        TEAM_NAMES.splice(idx, 1);
-        renderTeamManager();
-        saveNamesToGitHub();
-    }
-}
-
-async function saveNamesToGitHub() {
-    if (!admin) return;
-    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`;
-    try {
-        const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
-        const fileData = await res.json();
-        const payload = btoa(unescape(encodeURIComponent(JSON.stringify(TEAM_NAMES, null, 2))));
-        await fetch(url, {
-            method: 'PUT',
-            headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Update Team List", content: payload, sha: fileData.sha })
-        });
-    } catch (e) { console.error("Save failed"); }
-}
-
-// --- TABLE LOGIC ---
 function renderHeaders() {
     const html = HEADERS.map(h => `<th>${h}</th>`).join('');
     document.querySelectorAll(".hRow").forEach(el => el.innerHTML = html);
 }
 
 function renderBodies() {
-    const tbWorking = document.getElementById("tb-working"), tbDone = document.getElementById("tb-done");
-    tbWorking.innerHTML = ""; tbDone.innerHTML = "";
-    let counts = { working: 0, done: 0 };
+    const tbWorking = document.getElementById("tb-working"), tbDone = document.getElementById("tb-done"), tbStuck = document.getElementById("tb-stuck");
+    tbWorking.innerHTML = ""; tbDone.innerHTML = ""; tbStuck.innerHTML = "";
+    let counts = { working: 0, done: 0, stuck: 0 };
 
     DATA.forEach((r, idx) => {
         const tr = document.createElement("tr");
         tr.innerHTML = r.map((cell, cIdx) => {
             const h = HEADERS[cIdx].toLowerCase();
+            
+            // Weekly Status Dropdowns
             if (h.includes("week") || h.includes("feb")) {
                 return `<td><select onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin ? 'disabled' : ''}>
                     <option value=""></option><option value="YES" ${cell==='YES'?'selected':''}>YES</option>
                     <option value="NO" ${cell==='NO'?'selected':''}>NO</option><option value="NA" ${cell==='NA'?'selected':''}>NA</option>
                 </select></td>`;
             }
+            
+            // Calendar Date Pickers
             if (h.includes("date")) {
                 return `<td><input type="date" value="${cell}" onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin ? 'disabled' : ''}></td>`;
             }
+
+            // Project Status Dropdowns
             if (h.includes("status") && !h.includes("week")) {
                 return `<td><select onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin ? 'disabled' : ''}>
-                    <option value="Working" ${cell==='Working'?'selected':''}>Working</option>
+                    <option value="Working on it" ${cell==='Working on it'?'selected':''}>Working</option>
                     <option value="Done" ${cell==='Done'?'selected':''}>Done</option>
                     <option value="Stuck" ${cell==='Stuck'?'selected':''}>Stuck</option>
+                    <option value="Yet to Start" ${cell==='Yet to Start'?'selected':''}>Yet to Start</option>
                 </select></td>`;
             }
-            const isNameCol = h.includes("name") && !h.includes("project") && !h.includes("cert");
-            return `<td contenteditable="${admin && isNameCol}" oninput="${isNameCol ? `handleNameInput(event, ${idx}, ${cIdx})` : `updateCell(${idx}, ${cIdx}, this.innerText)`}">${cell}</td>`;
+
+            return `<td contenteditable="${admin}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
         }).join('');
         
-        if (r[5] === "Done") { tbDone.appendChild(tr); counts.done++; }
+        const status = (r[5] || "").toLowerCase();
+        if (status === "done") { tbDone.appendChild(tr); counts.done++; }
+        else if (status.includes("stuck") || status.includes("yet")) { tbStuck.appendChild(tr); counts.stuck++; }
         else { tbWorking.appendChild(tr); counts.working++; }
     });
+
     document.getElementById("countWorking").innerText = counts.working;
     document.getElementById("countDone").innerText = counts.done;
-}
-
-function handleNameInput(e, rIdx, cIdx) {
-    const query = e.target.innerText.trim().toLowerCase();
-    const cell = e.target;
-    document.querySelectorAll('.suggestion-box').forEach(b => b.remove());
-    if (query.length < 1) return;
-    const matches = TEAM_NAMES.filter(name => name.toLowerCase().includes(query));
-    if (matches.length > 0) {
-        const box = document.createElement('ul');
-        box.className = 'suggestion-box';
-        matches.forEach(m => {
-            const li = document.createElement('li');
-            li.innerText = m;
-            li.onclick = () => { cell.innerText = m; updateCell(rIdx, cIdx, m); box.remove(); };
-            box.appendChild(li);
-        });
-        cell.style.position = 'relative';
-        cell.appendChild(box);
-    }
+    document.getElementById("countStuck").innerText = counts.stuck;
 }
 
 function updateCell(rIdx, cIdx, val) {
     DATA[rIdx][cIdx] = val;
-    if(cIdx === 5) renderBodies();
+    if(cIdx === 5) renderBodies(); // Auto-sort tables when status changes
     clearTimeout(autosaveTimer);
-    autosaveTimer = setTimeout(saveToGitHub, 2000);
+    autosaveTimer = setTimeout(saveToGitHub, 2000); // 2-second autosave
 }
 
 async function saveToGitHub() {
@@ -239,14 +161,8 @@ async function saveToGitHub() {
 }
 
 function toggleAdmin() {
-    if(!admin && prompt("Admin Password:") === "admin123") { 
-        admin = true; 
-        document.getElementById("manageNamesBtn").style.display = "block";
-    } else { 
-        admin = false; 
-        document.getElementById("manageNamesBtn").style.display = "none";
-        document.getElementById("teamManager").style.display = "none";
-    }
+    if(!admin && prompt("Admin Password:") === "admin123") { admin = true; }
+    else { admin = false; }
     renderBodies();
 }
 
