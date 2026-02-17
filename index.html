@@ -3,186 +3,254 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurus Tracker Pro - Live Clock & Sync</title>
+<title>Aurus Tracker Pro | Team Management</title>
 <style>
-:root { --excel-green: #217346; --bg-color: #f4f7f6; --text-dark: #2c3e50; }
-body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); padding: 20px 40px; }
+:root { --excel-green: #217346; --bg: #f0f2f5; --text: #1a202c; --border: #e2e8f0; }
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
 
 /* HEADER & DASHBOARD */
-.header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.dashboard { display: flex; gap: 15px; align-items: center; }
-.stat-box { background: #fff; padding: 10px 18px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-weight: bold; border-left: 5px solid #3498db; }
+.header-container { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+#liveClock { font-weight: 700; color: #4a5568; background: #edf2f7; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
 
-/* CLOCK STYLE */
-#liveClock { font-size: 16px; color: var(--text-dark); font-weight: 600; background: #fff; padding: 10px 15px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-bottom: 3px solid var(--excel-green); }
+/* TEAM MANAGER PANEL */
+#teamManager { display: none; background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-top: 5px solid var(--excel-green); }
+.name-pill { display: inline-block; background: #edf2f7; padding: 5px 12px; border-radius: 15px; margin: 5px; font-size: 12px; font-weight: bold; }
+.remove-name { margin-left: 8px; color: #e53e3e; cursor: pointer; }
 
-/* INDICATORS */
-#autosaveIndicator { font-size: 12px; color: #27ae60; font-weight: bold; opacity: 0; transition: 0.3s; }
-#syncStatus { font-size: 11px; color: #e67e22; margin-left: 10px; font-weight: bold; }
+/* TABLES */
+.status-section { background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; }
+.section-header { padding: 12px 20px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; font-size: 14px; }
+.bg-working { background: #3182ce; } .bg-done { background: var(--excel-green); }
 
-.main-btn { background: #3498db; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-#adminSaveBtn { background: #2ecc71; display: none; margin-right: 10px; }
+.table-wrapper { overflow-x: auto; max-height: 45vh; }
+table { width: 100%; border-collapse: collapse; min-width: 1400px; }
+th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; padding: 12px; border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 10; }
+td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; text-align: center; }
 
-/* TABLE */
-.table-wrapper { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
-table { width: 100%; border-collapse: collapse; min-width: 1200px; }
-th, td { border: 1px solid #bdc3c7; padding: 10px; text-align: center; }
-th { background: #34495e; color: #fff; position: sticky; top: 0; }
+/* AUTOCOMPLETE */
+.suggestion-box { position: absolute; background: white; border: 1px solid #cbd5e0; z-index: 5000; max-height: 150px; overflow-y: auto; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-radius: 6px; min-width: 200px; list-style: none; padding: 0; margin: 0; text-align: left; }
+.suggestion-box li { padding: 8px 15px; cursor: pointer; font-size: 12px; border-bottom: 1px solid #edf2f7; }
+.suggestion-box li:hover { background: #ebf8ff; color: #3182ce; }
 
-#toast { visibility: hidden; min-width: 300px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 2000; left: 50%; bottom: 30px; transform: translateX(-50%); }
-#toast.show { visibility: visible; }
+.btn { padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
+.btn-admin { background: #2d3748; color: #fff; }
+.btn-save { background: var(--excel-green); color: #fff; }
 </style>
 </head>
 <body>
 
-<div id="toast">Notification</div>
-
 <div class="header-container">
   <div>
-    <h1>Aurus Tracker Live</h1>
-    <div class="dashboard">
-      <div id="liveClock">Loading Clock...</div> <div class="stat-box">📊 Total: <span id="statTotal">0</span></div>
-      <div class="stat-box">✅ Done: <span id="statComp">0</span></div>
-      <span id="autosaveIndicator">☁️ Saving...</span>
+    <h1>Aurus Certification <span style="color:var(--excel-green)">Tracker</span></h1>
+    <div style="display:flex; gap:15px; margin-top:5px; align-items:center;">
+        <div id="liveClock">Loading Clock...</div>
+        <div id="syncStatus" style="font-size:11px; font-weight:bold; color:#718096;">Sync: Ready</div>
     </div>
   </div>
-  <div>
-    <span id="syncStatus">Sync: Ready</span>
-    <button id="adminSaveBtn" class="main-btn" onclick="saveToGitHub()">🚀 Commit</button>
-    <button id="adminBtn" class="main-btn" onclick="toggleAdmin()">🔒 Admin Login</button>
+  <div style="display:flex; gap:10px;">
+    <button id="manageNamesBtn" class="btn btn-save" style="display:none;" onclick="toggleTeamManager()">👥 Manage Team</button>
+    <button id="adminBtn" class="btn btn-admin" onclick="toggleAdmin()">🔒 Admin Mode</button>
   </div>
 </div>
 
-<div class="table-wrapper">
-    <table>
-        <thead><tr id="hRow"></tr></thead>
-        <tbody id="tBody"></tbody>
-    </table>
+<div id="teamManager">
+    <h3 style="margin-top:0;">Manage Team Members</h3>
+    <div style="margin-bottom:15px;">
+        <input type="text" id="newNameInput" placeholder="New Member Name..." style="padding:8px; border:1px solid #ddd; border-radius:5px; width:250px;">
+        <button class="btn btn-save" onclick="addNewName()">Add Member</button>
+    </div>
+    <div id="namesContainer"></div>
+</div>
+
+<div class="status-section">
+    <div class="section-header bg-working"><span>⏳ IN-PROGRESS / WORKING</span><span id="countWorking">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-working"></tbody></table></div>
+</div>
+
+<div class="status-section">
+    <div class="section-header bg-done"><span>✅ COMPLETED</span><span id="countDone">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-done"></tbody></table></div>
 </div>
 
 <script>
-const GH_CONFIG = { owner: 'Studnit', repo: 'monday.com', path: 'data.json' };
-const GITHUB_TOKEN = "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"; 
+const GH_CONFIG = { owner: 'Studnit', repo: 'monday.com', dataPath: 'data.json', namePath: 'name.json' };
+const GITHUB_TOKEN = "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"; 
 
 let DATA = [];
-let HEADERS = ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer", "Lead", "Week 1", "Week 2"];
+let TEAM_NAMES = []; 
+let HEADERS = ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer Name", "Team Lead Name", "Last Week", "9–13 Feb"];
 let admin = false, autosaveTimer = null;
 
-// --- 1. LIVE CLOCK FUNCTION ---
 function startClock() {
     setInterval(() => {
-        const now = new Date();
-        const options = { 
-            weekday: 'short', 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit',
-            hour12: true 
-        };
-        document.getElementById('liveClock').innerText = "📅 " + now.toLocaleString('en-IN', options);
-    }, 1000);
+        document.getElementById('liveClock').innerText = "📅 " + new Date().toLocaleString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true });
+    }, 1000); 
 }
 
-// --- 2. GITHUB SYNC LOGIC ---
-async function loadFromGitHub() {
-    updateSyncStatus("⏳ Loading...");
-    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
+async function loadInitialData() {
     try {
-        const res = await fetch(url);
-        const json = await res.json();
-        const content = JSON.parse(atob(json.content));
+        const nameUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`;
+        const nameRes = await fetch(nameUrl);
+        const nameJson = await nameRes.json();
+        TEAM_NAMES = JSON.parse(atob(nameJson.content));
+        renderTeamManager();
+
+        const dataUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
+        const dataRes = await fetch(dataUrl);
+        const dataJson = await dataRes.json();
+        const content = JSON.parse(atob(dataJson.content));
         DATA = content.data || [];
-        renderBodies();
-        updateSyncStatus("✅ Live Synced");
-    } catch (e) {
-        updateSyncStatus("❌ Offline");
+        
+        renderHeaders(); renderBodies();
+    } catch (e) { console.error("Load failed", e); }
+}
+
+// --- TEAM MANAGEMENT ---
+function renderTeamManager() {
+    const container = document.getElementById("namesContainer");
+    container.innerHTML = TEAM_NAMES.map((name, idx) => `
+        <span class="name-pill">${name} <span class="remove-name" onclick="removeName(${idx})">✖</span></span>
+    `).join('');
+}
+
+function toggleTeamManager() {
+    const panel = document.getElementById("teamManager");
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+}
+
+function addNewName() {
+    const input = document.getElementById("newNameInput");
+    const name = input.value.trim();
+    if(name && !TEAM_NAMES.includes(name)) {
+        TEAM_NAMES.push(name);
+        TEAM_NAMES.sort();
+        input.value = "";
+        renderTeamManager();
+        saveNamesToGitHub();
     }
 }
 
-async function saveToGitHub(isAutosave = false) {
-    if (!admin || GITHUB_TOKEN.includes("YOUR_TOKEN")) return;
+function removeName(idx) {
+    if(confirm(`Remove ${TEAM_NAMES[idx]}?`)) {
+        TEAM_NAMES.splice(idx, 1);
+        renderTeamManager();
+        saveNamesToGitHub();
+    }
+}
 
-    updateSyncStatus("📤 Committing...");
-    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
-    
+async function saveNamesToGitHub() {
+    if (!admin) return;
+    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`;
     try {
-        const getRes = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
-        const fileData = await getRes.json();
-        const sha = fileData.sha;
-
-        const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ headers: HEADERS, data: DATA }, null, 2))));
-
-        const putRes = await fetch(url, {
+        const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
+        const fileData = await res.json();
+        const payload = btoa(unescape(encodeURIComponent(JSON.stringify(TEAM_NAMES, null, 2))));
+        await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Tracker Update", content: payload, sha: sha })
+            body: JSON.stringify({ message: "Update Team List", content: payload, sha: fileData.sha })
         });
-
-        if (putRes.ok) {
-            updateSyncStatus("✅ Saved at " + new Date().toLocaleTimeString());
-            if(isAutosave) {
-                document.getElementById("autosaveIndicator").style.opacity = "1";
-                setTimeout(() => document.getElementById("autosaveIndicator").style.opacity = "0", 1500);
-            }
-        }
-    } catch (e) {
-        updateSyncStatus("❌ Write Error");
-    }
+    } catch (e) { console.error("Save failed"); }
 }
 
-// --- 3. UI ENGINE ---
+// --- TABLE LOGIC ---
 function renderHeaders() {
-    document.getElementById("hRow").innerHTML = HEADERS.map(h => `<th>${h}</th>`).join('');
+    const html = HEADERS.map(h => `<th>${h}</th>`).join('');
+    document.querySelectorAll(".hRow").forEach(el => el.innerHTML = html);
 }
 
 function renderBodies() {
-    const tBody = document.getElementById("tBody");
-    tBody.innerHTML = "";
+    const tbWorking = document.getElementById("tb-working"), tbDone = document.getElementById("tb-done");
+    tbWorking.innerHTML = ""; tbDone.innerHTML = "";
+    let counts = { working: 0, done: 0 };
+
     DATA.forEach((r, idx) => {
         const tr = document.createElement("tr");
         tr.innerHTML = r.map((cell, cIdx) => {
-            const isStatus = cIdx === 5;
-            let cls = isStatus && cell.toLowerCase() === "done" ? "status-done" : "";
-            return `<td contenteditable="${admin}" class="${cls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
+            const h = HEADERS[cIdx].toLowerCase();
+            if (h.includes("week") || h.includes("feb")) {
+                return `<td><select onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin ? 'disabled' : ''}>
+                    <option value=""></option><option value="YES" ${cell==='YES'?'selected':''}>YES</option>
+                    <option value="NO" ${cell==='NO'?'selected':''}>NO</option><option value="NA" ${cell==='NA'?'selected':''}>NA</option>
+                </select></td>`;
+            }
+            if (h.includes("date")) {
+                return `<td><input type="date" value="${cell}" onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin ? 'disabled' : ''}></td>`;
+            }
+            if (h.includes("status") && !h.includes("week")) {
+                return `<td><select onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin ? 'disabled' : ''}>
+                    <option value="Working" ${cell==='Working'?'selected':''}>Working</option>
+                    <option value="Done" ${cell==='Done'?'selected':''}>Done</option>
+                    <option value="Stuck" ${cell==='Stuck'?'selected':''}>Stuck</option>
+                </select></td>`;
+            }
+            const isNameCol = h.includes("name") && !h.includes("project") && !h.includes("cert");
+            return `<td contenteditable="${admin && isNameCol}" oninput="${isNameCol ? `handleNameInput(event, ${idx}, ${cIdx})` : `updateCell(${idx}, ${cIdx}, this.innerText)`}">${cell}</td>`;
         }).join('');
-        tBody.appendChild(tr);
+        
+        if (r[5] === "Done") { tbDone.appendChild(tr); counts.done++; }
+        else { tbWorking.appendChild(tr); counts.working++; }
     });
-    document.getElementById("statTotal").innerText = DATA.length;
-    document.getElementById("statComp").innerText = DATA.filter(r => r[5]?.toLowerCase() === "done").length;
+    document.getElementById("countWorking").innerText = counts.working;
+    document.getElementById("countDone").innerText = counts.done;
+}
+
+function handleNameInput(e, rIdx, cIdx) {
+    const query = e.target.innerText.trim().toLowerCase();
+    const cell = e.target;
+    document.querySelectorAll('.suggestion-box').forEach(b => b.remove());
+    if (query.length < 1) return;
+    const matches = TEAM_NAMES.filter(name => name.toLowerCase().includes(query));
+    if (matches.length > 0) {
+        const box = document.createElement('ul');
+        box.className = 'suggestion-box';
+        matches.forEach(m => {
+            const li = document.createElement('li');
+            li.innerText = m;
+            li.onclick = () => { cell.innerText = m; updateCell(rIdx, cIdx, m); box.remove(); };
+            box.appendChild(li);
+        });
+        cell.style.position = 'relative';
+        cell.appendChild(box);
+    }
 }
 
 function updateCell(rIdx, cIdx, val) {
     DATA[rIdx][cIdx] = val;
+    if(cIdx === 5) renderBodies();
     clearTimeout(autosaveTimer);
-    autosaveTimer = setTimeout(() => saveToGitHub(true), 2000);
+    autosaveTimer = setTimeout(saveToGitHub, 2000);
+}
+
+async function saveToGitHub() {
+    if (!admin) return;
+    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
+    try {
+        const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
+        const fileData = await res.json();
+        const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ headers: HEADERS, data: DATA }, null, 2))));
+        await fetch(url, {
+            method: 'PUT',
+            headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: "Sync Data", content: payload, sha: fileData.sha })
+        });
+        document.getElementById("syncStatus").innerText = "Sync: ✅ Saved " + new Date().toLocaleTimeString();
+    } catch (e) { console.error("Save failed"); }
 }
 
 function toggleAdmin() {
-    if(!admin) {
-        if(prompt("Admin Password:") === "admin123") {
-            admin = true;
-            document.getElementById("adminBtn").innerText = "🔓 Exit Admin";
-            document.getElementById("adminSaveBtn").style.display = "inline-block";
-        }
-    } else {
-        admin = false;
-        document.getElementById("adminBtn").innerText = "🔒 Admin Login";
-        document.getElementById("adminSaveBtn").style.display = "none";
+    if(!admin && prompt("Admin Password:") === "admin123") { 
+        admin = true; 
+        document.getElementById("manageNamesBtn").style.display = "block";
+    } else { 
+        admin = false; 
+        document.getElementById("manageNamesBtn").style.display = "none";
+        document.getElementById("teamManager").style.display = "none";
     }
     renderBodies();
 }
 
-function updateSyncStatus(msg) { document.getElementById("syncStatus").innerText = "Sync: " + msg; }
-
-// --- INITIALIZE ---
-window.onload = () => {
-    startClock();
-    renderHeaders();
-    loadFromGitHub();
-};
+window.onload = () => { startClock(); loadInitialData(); };
 </script>
 </body>
 </html>
