@@ -3,286 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurus Certification Tracker Pro - Live Sync</title>
+<title>Aurus Tracker Pro - Fixed Sync</title>
 <style>
-:root {
-  --excel-green: #217346;
-  --bg-color: #f4f7f6;
-  --text-dark: #2c3e50;
-  --border-color: #bdc3c7;
-}
+:root { --excel-green: #217346; --bg-color: #f4f7f6; --text-dark: #2c3e50; }
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); padding: 20px 40px; }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--bg-color); margin: 0; padding: 20px 20px 40px 40px;
-}
+/* HEADER & STATS */
+.header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.dashboard { display: flex; gap: 15px; align-items: center; }
+.stat-box { background: #fff; padding: 10px 18px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-weight: bold; border-left: 5px solid #3498db; }
 
-h1 { margin: 0; color: var(--text-dark); }
-.section-title {
-  color: #2c3e50; margin-top: 30px; margin-bottom: 10px; font-size: 20px; display: flex; align-items: center; gap: 10px;
-}
+/* INDICATORS */
+#autosaveIndicator { font-size: 12px; color: #27ae60; font-weight: bold; opacity: 0; transition: 0.3s; }
+#syncStatus { font-size: 11px; color: #e67e22; margin-left: 10px; font-weight: bold; }
 
-/* DASHBOARD STYLE */
-.header-container { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
-.dashboard { display: flex; gap: 15px; margin-top: 12px; align-items: center; }
-.stat-box {
-  background: #fff; padding: 10px 18px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-size: 14px; font-weight: bold; color: var(--text-dark); border-left: 5px solid #3498db;
-}
-.stat-box:nth-child(2) { border-left-color: #00c875; } 
-.stat-box:nth-child(3) { border-left-color: #fdab3d; } 
+/* BUTTONS */
+.main-btn { background: #3498db; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+#adminSaveBtn { background: #2ecc71; display: none; margin-right: 10px; }
 
-#autosaveIndicator { font-size: 12px; color: #27ae60; font-weight: bold; opacity: 0; transition: 0.3s; margin-left: 10px; }
-#lastSynced { font-size: 11px; color: #7f8c8d; margin-left: 10px; }
+/* TABLE */
+.table-wrapper { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+th, td { border: 1px solid #bdc3c7; padding: 10px; text-align: center; }
+th { background: #34495e; color: #fff; position: sticky; top: 0; }
 
-/* CONTROLS */
-.controls { display: flex; gap: 10px; align-items: center; }
-#searchInput { padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; width: 200px; outline: none; font-size: 14px; }
-.main-btn {
-  background: #3498db; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;
-}
-.main-btn:hover { filter: brightness(1.1); }
-#adminSaveBtn { background: #2ecc71; display: none; }
+.status-done { background: #00c875 !important; color: #fff; }
+.status-working { background: #fdab3d !important; color: #fff; }
 
-/* TABLES */
-.table-wrapper { overflow-x: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border-radius: 8px; background: #fff; max-height: 55vh; margin-bottom: 20px; }
-table { width: 100%; border-collapse: collapse; background: #fff; min-width: 1400px; }
-th, td { border: 1px solid var(--border-color); padding: 10px; font-size: 13px; text-align: center; white-space: nowrap; }
-th { position: sticky; color: #fff; font-size: 14px; background: #34495e; top: 0; z-index: 3; }
-
-/* STATUS HIGHLIGHTS */
-.status-working { background: #fdab3d !important; color: #fff !important; font-weight: bold; }
-.status-done { background: #00c875 !important; color: #fff !important; font-weight: bold; }
-.status-stuck { background: #e2445c !important; color: #fff !important; font-weight: bold; }
-
-/* TOAST NOTIFICATION */
-#toast {
-  visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 2000; left: 50%; bottom: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s;
-}
-#toast.show { visibility: visible; opacity: 1; bottom: 50px; }
-
-/* CONTEXT MENU */
-.context-menu {
-  position: absolute; background: #fff; border: 1px solid var(--border-color); box-shadow: 2px 4px 12px rgba(0,0,0,0.2);
-  z-index: 10000; border-radius: 6px; padding: 8px 0; min-width: 180px; list-style: none; margin: 0; display: none;
-}
-.context-menu li { padding: 8px 20px; font-size: 13px; cursor: pointer; color: #2c3e50; }
-.context-menu li:hover { background: #f4f7f6; color: #3498db; }
+/* TOAST */
+#toast { visibility: hidden; min-width: 300px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 2000; left: 50%; bottom: 30px; transform: translateX(-50%); }
+#toast.show { visibility: visible; animation: fadein 0.5s; }
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
 </style>
 </head>
 <body>
 
-<div id="toast">Notification</div>
-
-<ul id="contextMenu" class="context-menu">
-  <li onclick="addRowContext()">➕ Add New Row</li>
-  <li onclick="deleteRowContext()" style="color:red">🗑️ Delete Row</li>
-  <li onclick="moveRowContext(-1)">🔼 Move Row Up</li>
-  <li onclick="moveRowContext(1)">🔽 Move Row Down</li>
-</ul>
+<div id="toast">Notification Message</div>
 
 <div class="header-container">
   <div>
-    <h1>Aurus Certification Tracker</h1>
+    <h1>Aurus Tracker Live</h1>
     <div class="dashboard">
       <div class="stat-box">📊 Total: <span id="statTotal">0</span></div>
       <div class="stat-box">✅ Done: <span id="statComp">0</span></div>
-      <span id="autosaveIndicator">☁️ Syncing to GitHub...</span>
-      <span id="lastSynced"></span>
+      <span id="autosaveIndicator">☁️ Saving to GitHub...</span>
+      <span id="syncStatus">Ready</span>
     </div>
   </div>
-  <div class="controls">
-    <button id="adminSaveBtn" class="main-btn" onclick="saveToGitHub()">🚀 Commit to GitHub</button>
-    <button class="main-btn" style="background:var(--excel-green)" onclick="exportCSV()">📤 Export CSV</button>
-    <input type="text" id="searchInput" placeholder="🔍 Global Search..." oninput="renderBodies()">
-    <button id="adminBtn" class="main-btn" onclick="toggleAdmin()">🔒 Enable Admin Mode</button>
+  <div>
+    <button id="adminSaveBtn" class="main-btn" onclick="saveToGitHub()">🚀 Force Commit</button>
+    <button id="adminBtn" class="main-btn" onclick="toggleAdmin()">🔒 Admin Login</button>
   </div>
 </div>
 
-<h2 class="section-title">⏳ In-Progress Projects</h2>
-<div class="table-wrapper"><table id="table1"><thead><tr id="h1"></tr></thead><tbody id="tb1"></tbody></table></div>
-
-<h2 class="section-title">✅ Completed Projects</h2>
-<div class="table-wrapper"><table id="table2"><thead><tr id="h2"></tr></thead><tbody id="tb2"></tbody></table></div>
+<div class="table-wrapper">
+    <table>
+        <thead><tr id="hRow"></tr></thead>
+        <tbody id="tBody"></tbody>
+    </table>
+</div>
 
 <script>
-// --- CONFIGURATION ---
-const GH_CONFIG = {
-    owner: 'Studnit',
-    repo: 'monday.com',
-    path: 'data.json'
-};
+const GH_CONFIG = { owner: 'Studnit', repo: 'monday.com', path: 'data.json' };
 
-// --- OPTION 1: HARD-CODED TOKEN FOR ADMIN WRITE ACCESS ---
-let GITHUB_TOKEN = "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"; 
+// PASTE YOUR TOKEN HERE
+const GITHUB_TOKEN = "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"; 
 
 let DATA = [];
-let HEADERS = ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer Name", "Team Lead Name", "Last Week", "9–13 Feb"];
-let admin = false, activeRow = null, autosaveTimer = null;
+let HEADERS = ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer", "Lead", "Week 1", "Week 2"];
+let admin = false, autosaveTimer = null;
 
-// 1. GITHUB API LOGIC
+// --- GITHUB SYNC LOGIC ---
+
+
 async function loadFromGitHub() {
+    updateSyncStatus("⏳ Loading data...");
     const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
     try {
         const res = await fetch(url);
-        if(!res.ok) throw new Error();
+        if(!res.ok) throw new Error("File not found");
         const json = await res.json();
         const content = JSON.parse(atob(json.content));
-        
         DATA = content.data || [];
-        if(content.headers) HEADERS = content.headers;
-        
-        renderHeaders(); renderBodies();
-        showToast("✅ Live Data Connected");
+        renderBodies();
+        updateSyncStatus("✅ Live");
+        showToast("Connected to GitHub Successfully");
     } catch (e) {
-        showToast("⚠️ Repository file not found. Ensure data.json exists.", "error");
-        renderHeaders(); renderBodies();
+        updateSyncStatus("⚠️ Error Loading");
+        showToast("GitHub Connection Failed. Check if data.json exists.", "error");
     }
 }
 
 async function saveToGitHub(isAutosave = false) {
-    if (!admin || !GITHUB_TOKEN) return;
+    if (!admin || GITHUB_TOKEN.includes("YOUR_TOKEN")) {
+        showToast("Error: No Token Provided", "error");
+        return;
+    }
 
+    updateSyncStatus("📤 Committing...");
     const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
+    
     try {
-        const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
-        const fileData = await res.json();
-        
-        const payload = { headers: HEADERS, data: DATA };
-        const update = await fetch(url, {
+        // 1. Get SHA (Required by GitHub for every update)
+        const getRes = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
+        const fileData = await getRes.json();
+        const sha = fileData.sha;
+
+        // 2. Prepare Payload
+        const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ headers: HEADERS, data: DATA }, null, 2))));
+
+        // 3. Write Data
+        const putRes = await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: isAutosave ? "Autosave update" : "Manual Commit Operation",
-                content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
-                sha: fileData.sha
-            })
+            body: JSON.stringify({ message: "Admin update", content: payload, sha: sha })
         });
 
-        if (update.ok) {
-            document.getElementById("lastSynced").innerText = "Last commit: " + new Date().toLocaleTimeString();
-            if (isAutosave) {
+        if (putRes.ok) {
+            updateSyncStatus("✅ Saved: " + new Date().toLocaleTimeString());
+            if(isAutosave) {
                 document.getElementById("autosaveIndicator").style.opacity = "1";
                 setTimeout(() => document.getElementById("autosaveIndicator").style.opacity = "0", 1500);
             } else {
-                showToast("🚀 Committed successfully to GitHub!");
+                showToast("🚀 Data Pushed to GitHub Repository!");
             }
+        } else {
+            throw new Error();
         }
     } catch (e) {
-        showToast("❌ GitHub Token Error - Check repo permissions", "error");
+        updateSyncStatus("❌ Save Failed");
+        showToast("Write Error: Check Token Permissions (repo scope)", "error");
     }
 }
 
-// 2. UI & RENDERING
-function renderHeaders() {
-    const html = HEADERS.map(h => `<th>${h}</th>`).join('');
-    document.getElementById("h1").innerHTML = html;
-    document.getElementById("h2").innerHTML = html;
-}
-
+// --- UI ENGINE ---
 function renderBodies() {
-    const tb1 = document.getElementById("tb1"), tb2 = document.getElementById("tb2");
-    const q = document.getElementById("searchInput").value.toLowerCase();
-    tb1.innerHTML = ""; tb2.innerHTML = "";
+    const hRow = document.getElementById("hRow");
+    const tBody = document.getElementById("tBody");
+    hRow.innerHTML = HEADERS.map(h => `<th>${h}</th>`).join('');
     
-    let compCount = 0;
+    tBody.innerHTML = "";
     DATA.forEach((r, idx) => {
-        if(q && !r.join(' ').toLowerCase().includes(q)) return;
-        
-        const status = (r[5] || "").toUpperCase();
-        const isDone = status === "DONE";
-        if(isDone) compCount++;
-
         const tr = document.createElement("tr");
-        tr.dataset.index = idx;
         tr.innerHTML = r.map((cell, cIdx) => {
-            let cls = "";
-            if(cIdx === 5) {
-                if(status === "DONE") cls = "status-done";
-                else if(status === "STUCK") cls = "status-stuck";
-                else cls = "status-working";
-            }
-            return `<td ${admin ? 'contenteditable="true"' : ''} class="${cls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
+            const isStatus = cIdx === 5;
+            let cls = isStatus && cell.toLowerCase() === "done" ? "status-done" : (isStatus ? "status-working" : "");
+            return `<td contenteditable="${admin}" class="${cls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
         }).join('');
-        
-        if(isDone) tb2.appendChild(tr); else tb1.appendChild(tr);
+        tBody.appendChild(tr);
     });
+    
     document.getElementById("statTotal").innerText = DATA.length;
-    document.getElementById("statComp").innerText = compCount;
+    document.getElementById("statComp").innerText = DATA.filter(r => r[5]?.toLowerCase() === "done").length;
 }
 
 function updateCell(rIdx, cIdx, val) {
     DATA[rIdx][cIdx] = val;
-    if(cIdx === 5) renderBodies();
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(() => saveToGitHub(true), 2000);
 }
 
 function toggleAdmin() {
     if(!admin) {
-        if(prompt("Admin Password:") !== "admin123") return showToast("Access Denied", "error");
-        admin = true;
-        document.getElementById("adminBtn").innerText = "🔓 Exit Admin Mode";
-        document.getElementById("adminSaveBtn").style.display = "block";
-        showToast("Write Access Granted");
+        if(prompt("Enter Admin Password:") === "admin123") {
+            admin = true;
+            document.getElementById("adminBtn").innerText = "🔓 Exit Admin";
+            document.getElementById("adminSaveBtn").style.display = "inline-block";
+            showToast("Admin Permissions Active");
+        }
     } else {
         admin = false;
-        document.getElementById("adminBtn").innerText = "🔒 Enable Admin Mode";
+        document.getElementById("adminBtn").innerText = "🔒 Admin Login";
         document.getElementById("adminSaveBtn").style.display = "none";
-        showToast("Read-Only Mode");
     }
     renderBodies();
 }
 
-// 3. RIGHT CLICK ACTIONS
-document.addEventListener('contextmenu', e => {
-    if(!admin) return;
-    const td = e.target.closest('td');
-    if(td) {
-        e.preventDefault();
-        const menu = document.getElementById("contextMenu");
-        menu.style.display = "block";
-        menu.style.left = e.pageX + "px"; menu.style.top = e.pageY + "px";
-        activeRow = td.parentElement;
-    }
-});
-document.addEventListener('click', () => document.getElementById("contextMenu").style.display = "none");
-
-function addRowContext() {
-    DATA.push(Array(HEADERS.length).fill(""));
-    showToast("➕ Row Added");
-    renderBodies(); saveToGitHub(true);
-}
-
-function deleteRowContext() {
-    if(confirm("Permanently delete this row?")) {
-        DATA.splice(parseInt(activeRow.dataset.index), 1);
-        showToast("🗑️ Row Deleted", "error");
-        renderBodies(); saveToGitHub(true);
-    }
-}
-
-function moveRowContext(dir) {
-    const idx = parseInt(activeRow.dataset.index);
-    const target = idx + dir;
-    if(target >= 0 && target < DATA.length) {
-        [DATA[idx], DATA[target]] = [DATA[target], DATA[idx]];
-        renderBodies(); saveToGitHub(true);
-        showToast("↕️ Row Reordered");
-    }
-}
+function updateSyncStatus(msg) { document.getElementById("syncStatus").innerText = msg; }
 
 function showToast(msg, type="success") {
     const t = document.getElementById("toast");
-    t.innerText = msg; t.style.background = type === "success" ? "#27ae60" : "#e74c3c";
-    t.className = "show"; setTimeout(() => t.className = "", 3000);
-}
-
-function exportCSV() {
-    let csv = HEADERS.join(",") + "\n" + DATA.map(r => r.join(",")).join("\n");
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    a.download = 'AurusTracker_Backup.csv'; a.click();
-    showToast("📊 Backup CSV Downloaded");
+    t.innerText = msg;
+    t.style.background = type === "success" ? "#27ae60" : "#e74c3c";
+    t.className = "show";
+    setTimeout(() => { t.className = ""; }, 3000);
 }
 
 window.onload = loadFromGitHub;
