@@ -36,15 +36,5 @@
       "",
       "YES"
     ]
-  ],
-  "meta": {
-    "3": { "type": "date" },
-    "4": { "type": "date" },
-    "5": {
-      "type": "dropdown",
-      "options": ["Working on it", "Done", "Stuck", "Yet to Start"]
-    },
-    "8": { "type": "dropdown", "options": ["YES", "NO", "NA", "Waiting"] },
-    "9": { "type": "dropdown", "options": ["YES", "NO", "NA", "Waiting"] }
-  }
+  ]
 }
