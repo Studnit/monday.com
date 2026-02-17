@@ -3,114 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurus Tracker Pro | Live Sync</title>
+<title>Aurus Tracker Pro | Fully Colored Excel Grid</title>
 <style>
-:root { --excel-green: #217346; --bg: #f0f2f5; --text: #1a202c; --border: #e2e8f0; }
-body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+:root { --excel-green: #217346; --bg: #f4f7f6; --text: #1a202c; --border: #cbd5e0; }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
 
-/* HEADER & DASHBOARD */
+/* HEADER */
 .header-container { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
 #liveClock { font-weight: 700; color: #4a5568; background: #edf2f7; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
 
-/* SEPARATED TABLES */
-.status-section { background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; }
-.section-header { padding: 12px 20px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; font-size: 14px; }
-.bg-working { background: #3182ce; } .bg-done { background: var(--excel-green); } .bg-stuck { background: #e53e3e; }
+/* TABLE WRAPPER & FREEZE */
+.table-wrapper { overflow-x: auto; max-height: 50vh; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+table { width: 100%; border-collapse: collapse; min-width: 1600px; background: white; }
+th { background: #34495e; color: white; font-size: 11px; text-transform: uppercase; padding: 12px; border: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
 
-.table-wrapper { overflow-x: auto; max-height: 40vh; }
-table { width: 100%; border-collapse: collapse; min-width: 1500px; }
-th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; padding: 12px; border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 10; cursor: pointer; }
-td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; text-align: center; min-width: 100px; }
+/* Frozen Columns Styles */
+th:nth-child(-n+3), td:nth-child(-n+3) { position: sticky; left: 0; z-index: 5; border-right: 2px solid var(--border); }
+th:nth-child(2), td:nth-child(2) { left: 60px; } 
+th:nth-child(3), td:nth-child(3) { left: 140px; }
+th:nth-child(-n+3) { z-index: 11; }
 
-/* COLORED CELLS */
-.cell-yes { background-color: #c6f6d5 !important; color: #22543d !important; font-weight: bold; }
-.cell-no { background-color: #fed7d7 !important; color: #822727 !important; font-weight: bold; }
-.cell-na { background-color: #edf2f7 !important; }
+/* Cell Colors */
+td { padding: 8px; border: 1px solid var(--border); font-size: 13px; text-align: center; color: #2d3748; }
+td:nth-child(1) { background: #ebf5fb; font-weight: bold; } /* SR NO */
+td:nth-child(2) { background: #fdf2f2; } /* EP ID */
+td:nth-child(3) { background: #e8f4fd; text-align: left; font-weight: 600; } /* Name */
 
-/* CONTEXT MENU & INPUTS */
-.context-menu { position: absolute; background: #fff; border: 1px solid #ddd; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 10000; border-radius: 8px; padding: 8px 0; list-style: none; display: none; min-width: 200px; }
-.context-menu li { padding: 10px 20px; font-size: 13px; cursor: pointer; }
-.context-menu li:hover { background: #f7fafc; color: var(--excel-green); }
-.suggestion-box { position: absolute; background: white; border: 1px solid #cbd5e0; z-index: 5000; max-height: 150px; overflow-y: auto; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-radius: 6px; min-width: 200px; list-style: none; padding: 0; margin: 0; text-align: left; }
-.suggestion-box li { padding: 8px 15px; cursor: pointer; font-size: 12px; }
-.suggestion-box li:hover { background: #ebf8ff; color: #3182ce; }
-input[type="date"], select { padding: 5px; border-radius: 4px; border: 1px solid #ddd; width: 95%; background: white; }
+/* Heatmap Classes */
+.bg-yes { background-color: #2ecc71 !important; color: white !important; font-weight: bold; }
+.bg-no { background-color: #e74c3c !important; color: white !important; font-weight: bold; }
+.bg-na { background-color: #bdc3c7 !important; color: #2c3e50 !important; }
+.bg-working { background-color: #f39c12 !important; color: white !important; font-weight: bold; }
+.bg-done { background-color: #27ae60 !important; color: white !important; font-weight: bold; }
+.bg-stuck { background-color: #c0392b !important; color: white !important; font-weight: bold; }
+
+/* INPUTS */
+select, input[type="date"] { width: 100%; border: none; background: transparent; font-family: inherit; text-align: center; cursor: pointer; }
 .btn-admin { background: #2d3748; color: #fff; padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
+#syncStatus { font-size: 11px; font-weight: bold; color: #718096; margin-left: 10px; }
 </style>
 </head>
 <body>
 
 <div class="header-container">
   <div>
-    <h1>Aurus <span style="color:var(--excel-green)">Tracker Pro</span></h1>
+    <h1>Aurus Certification <span style="color:var(--excel-green)">Grid Pro</span></h1>
     <div style="display:flex; gap:15px; margin-top:5px; align-items:center;">
         <div id="liveClock">Loading Clock...</div>
-        <div id="syncStatus" style="font-size:11px; font-weight:bold; color:#718096;">Sync: Ready</div>
+        <div id="syncStatus">Sync: Ready</div>
     </div>
   </div>
   <div style="display:flex; gap:10px;">
-    <button id="manageNamesBtn" class="btn-admin" style="display:none; background:var(--excel-green);" onclick="toggleTeamManager()">👥 Manage Names</button>
-    <button id="adminBtn" class="btn-admin" onclick="toggleAdmin()">🔒 Admin Mode</button>
+    <button id="adminSaveBtn" class="btn-admin" style="display:none; background:var(--excel-green);" onclick="saveToGitHub()">🚀 Force Commit</button>
+    <button id="adminBtn" class="btn-admin" onclick="toggleAdmin()">🔒 Admin Login</button>
   </div>
 </div>
 
-<ul id="contextMenu" class="context-menu">
-  <li onclick="renameColumnContext()">✏️ Rename Column</li>
-  <li onclick="addColumnContext()">📊 Add Column (Right)</li>
-  <li onclick="deleteColumnContext()" style="color:red">✂️ Delete Column</li>
-  <hr style="border:0; border-top:1px solid #eee; margin:5px 0;">
-  <li onclick="addRowContext()">➕ Add New Row</li>
-  <li onclick="deleteRowContext()" style="color:red">🗑️ Delete Row</li>
-</ul>
-
-<div id="teamManager" style="display:none; background:#fff; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
-    <h3 style="margin:0 0 15px 0;">Team Member List (name.json)</h3>
-    <div style="margin-bottom:15px;">
-        <input type="text" id="newNameInput" placeholder="Add new name..." style="padding:8px; border:1px solid #ddd; border-radius:5px; width:250px;">
-        <button class="btn-admin" style="background:var(--excel-green);" onclick="addNewName()">Add Member</button>
-    </div>
-    <div id="namesContainer"></div>
-</div>
-
-<div class="status-section">
-    <div class="section-header bg-working"><span>⏳ WORKING / IN-PROGRESS</span><span id="countWorking">0</span></div>
-    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-working"></tbody></table></div>
-</div>
-
-<div class="status-section">
-    <div class="section-header bg-done"><span>✅ COMPLETED</span><span id="countDone">0</span></div>
-    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-completed"></tbody></table></div>
-</div>
-
-<div class="status-section">
-    <div class="section-header bg-stuck"><span>🛑 STUCK / YET TO START</span><span id="countStuck">0</span></div>
-    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-stuck"></tbody></table></div>
+<div class="table-wrapper">
+    <table>
+        <thead><tr class="hRow"></tr></thead>
+        <tbody id="mainBody"></tbody>
+    </table>
 </div>
 
 <script>
 const GH_CONFIG = { owner: 'Studnit', repo: 'monday.com', dataPath: 'data.json', namePath: 'name.json' };
-const GITHUB_TOKEN = "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";  // PASTE TOKEN
+const GITHUB_TOKEN = "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"; 
 
 let DATA = [], TEAM_NAMES = [], HEADERS = [];
-let admin = false, activeCell = null, autosaveTimer = null;
+let admin = false, autosaveTimer = null;
 
 function startClock() {
     setInterval(() => {
         document.getElementById('liveClock').innerText = "📅 " + new Date().toLocaleString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true });
-    }, 1000); // Live date/time display
+    }, 1000);
 }
 
-async function loadAllData() {
+async function loadData() {
     try {
-        const nameUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`;
-        const nameRes = await fetch(nameUrl);
+        const nameRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`);
         TEAM_NAMES = JSON.parse(atob((await nameRes.json()).content));
-        renderTeamManager();
 
-        const dataUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
-        const dataRes = await fetch(dataUrl);
-        const dataJson = await dataRes.json();
-        const content = JSON.parse(atob(dataJson.content));
+        const dataRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`);
+        const content = JSON.parse(atob((await dataRes.json()).content));
         DATA = content.data || [];
         HEADERS = content.headers || [];
         
@@ -119,75 +94,60 @@ async function loadAllData() {
 }
 
 function renderHeaders() {
-    const html = HEADERS.map(h => `<th>${h}</th>`).join('');
-    document.querySelectorAll(".hRow").forEach(el => el.innerHTML = html);
+    document.querySelector(".hRow").innerHTML = HEADERS.map(h => `<th>${h}</th>`).join('');
 }
 
 function renderBodies() {
-    const sections = { working: document.getElementById("tb-working"), done: document.getElementById("tb-completed"), stuck: document.getElementById("tb-stuck") };
-    Object.values(sections).forEach(s => s.innerHTML = "");
-    let counts = { working: 0, done: 0, stuck: 0 };
-    let statusIdx = HEADERS.findIndex(h => h.toLowerCase().includes("status"));
-
+    const body = document.getElementById("mainBody");
+    body.innerHTML = "";
+    
     DATA.forEach((r, idx) => {
         const tr = document.createElement("tr");
-        tr.dataset.index = idx;
         tr.innerHTML = r.map((cell, cIdx) => {
             const h = HEADERS[cIdx].toLowerCase();
-            let colorCls = cell === "YES" ? "cell-yes" : (cell === "NO" ? "cell-no" : (cell === "NA" ? "cell-na" : ""));
+            let colorCls = "";
             
-            if (h.includes("date") && admin) {
-                return `<td><input type="date" value="${cell}" onchange="updateCell(${idx}, ${cIdx}, this.value)"></td>`;
-            }
-            if (h.includes("status") && !h.includes("week") && admin) {
-                return `<td><select onchange="updateCell(${idx}, ${cIdx}, this.value)">
+            // Conditional Formatting Logic
+            if (cell === "YES") colorCls = "bg-yes";
+            else if (cell === "NO") colorCls = "bg-no";
+            else if (cell === "NA") colorCls = "bg-na";
+            
+            if (h.includes("status") && !h.includes("week")) {
+                if (cell === "Done") colorCls = "bg-done";
+                else if (cell === "Working on it") colorCls = "bg-working";
+                else if (cell === "Stuck") colorCls = "bg-stuck";
+                
+                return `<td class="${colorCls}"><select onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin ? 'disabled' : ''}>
                     <option value="Working on it" ${cell==='Working on it'?'selected':''}>Working</option>
                     <option value="Done" ${cell==='Done'?'selected':''}>Done</option>
                     <option value="Stuck" ${cell==='Stuck'?'selected':''}>Stuck</option>
                     <option value="Yet to Start" ${cell==='Yet to Start'?'selected':''}>Yet to Start</option>
                 </select></td>`;
             }
-            const isName = h.includes("name") && !h.includes("project") && !h.includes("cert");
-            return `<td contenteditable="${admin}" class="${colorCls}" 
-                    oninput="${isName ? `handleNameInput(event, ${idx}, ${cIdx})` : `updateCell(${idx}, ${cIdx}, this.innerText)`}">${cell}</td>`;
+
+            if ((h.includes("week") || h.includes("feb")) && admin) {
+                return `<td class="${colorCls}"><select onchange="updateCell(${idx}, ${cIdx}, this.value)" class="${colorCls}">
+                    <option value=""></option><option value="YES" ${cell==='YES'?'selected':''}>YES</option>
+                    <option value="NO" ${cell==='NO'?'selected':''}>NO</option><option value="NA" ${cell==='NA'?'selected':''}>NA</option>
+                </select></td>`;
+            }
+
+            return `<td contenteditable="${admin}" class="${colorCls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
         }).join('');
-        
-        const status = (statusIdx !== -1 && r[statusIdx]) ? r[statusIdx].toLowerCase() : "";
-        if (status === "done") { sections.done.appendChild(tr); counts.done++; }
-        else if (status.includes("stuck") || status.includes("yet")) { sections.stuck.appendChild(tr); counts.stuck++; }
-        else { sections.working.appendChild(tr); counts.working++; }
+        body.appendChild(tr);
     });
-    document.getElementById("countWorking").innerText = counts.working;
-    document.getElementById("countDone").innerText = counts.done;
-    document.getElementById("countStuck").innerText = counts.stuck;
 }
 
 function updateCell(rIdx, cIdx, val) {
     DATA[rIdx][cIdx] = val;
-    if(HEADERS[cIdx].toLowerCase().includes("status")) renderBodies(); 
+    renderBodies(); // Re-render to update colors instantly
     clearTimeout(autosaveTimer);
-    autosaveTimer = setTimeout(saveDataToGitHub, 2000); // 2-sec autosave
+    autosaveTimer = setTimeout(saveToGitHub, 2000);
 }
 
-function handleNameInput(e, rIdx, cIdx) {
-    const query = e.target.innerText.trim().toLowerCase();
-    const cell = e.target;
-    document.querySelectorAll('.suggestion-box').forEach(b => b.remove());
-    if (query.length < 1) return;
-    const matches = TEAM_NAMES.filter(name => name.toLowerCase().includes(query));
-    if (matches.length > 0) {
-        const box = document.createElement('ul'); box.className = 'suggestion-box';
-        matches.forEach(m => {
-            const li = document.createElement('li'); li.innerText = m;
-            li.onclick = () => { cell.innerText = m; updateCell(rIdx, cIdx, m); box.remove(); };
-            box.appendChild(li);
-        });
-        cell.appendChild(box);
-    }
-}
-
-async function saveDataToGitHub() {
+async function saveToGitHub() {
     if (!admin) return;
+    document.getElementById("syncStatus").innerText = "Sync: 📤 Saving...";
     const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
     try {
         const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
@@ -196,49 +156,21 @@ async function saveDataToGitHub() {
         await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Grid Manipulation Sync", content: payload, sha: fileData.sha })
+            body: JSON.stringify({ message: "Color Grid Sync", content: payload, sha: fileData.sha })
         });
         document.getElementById("syncStatus").innerText = "Sync: ✅ Saved " + new Date().toLocaleTimeString();
-    } catch (e) { console.error("Save failed"); }
+    } catch (e) { document.getElementById("syncStatus").innerText = "Sync: ❌ Error"; }
 }
 
 function toggleAdmin() {
     if(!admin && prompt("Admin Pass:") === "admin123") { 
         admin = true; 
-        document.getElementById("manageNamesBtn").style.display = "block";
-        document.getElementById("adminBtn").innerText = "🔓 Exit Admin";
-    } else { admin = false; document.getElementById("manageNamesBtn").style.display = "none"; document.getElementById("teamManager").style.display = "none"; document.getElementById("adminBtn").innerText = "🔒 Admin Mode";}
+        document.getElementById("adminSaveBtn").style.display = "block";
+    } else { admin = false; document.getElementById("adminSaveBtn").style.display = "none"; }
     renderBodies();
 }
 
-// CONTEXT MENU LOGIC
-document.addEventListener('contextmenu', e => {
-    if(!admin) return;
-    const td = e.target.closest('td'), th = e.target.closest('th');
-    if(td || th) {
-        e.preventDefault(); const menu = document.getElementById("contextMenu");
-        menu.style.display = "block"; menu.style.left = e.pageX + "px"; menu.style.top = e.pageY + "px";
-        activeCell = td || th;
-    }
-});
-document.addEventListener('click', () => document.getElementById("contextMenu").style.display = "none");
-
-function renameColumnContext() {
-    const cIdx = activeCell.cellIndex; const newName = prompt("New Header Name:", HEADERS[cIdx]);
-    if(newName) { HEADERS[cIdx] = newName; renderHeaders(); saveDataToGitHub(); }
-}
-function addColumnContext() {
-    const colName = prompt("New Column Name:");
-    if(colName) { HEADERS.push(colName); DATA.forEach(r => r.push("")); renderHeaders(); renderBodies(); saveDataToGitHub(); }
-}
-function deleteColumnContext() {
-    const cIdx = activeCell.cellIndex;
-    if(confirm(`Delete column "${HEADERS[cIdx]}"?`)) { HEADERS.splice(cIdx, 1); DATA.forEach(r => r.splice(cIdx, 1)); renderHeaders(); renderBodies(); saveDataToGitHub(); }
-}
-function addRowContext() { DATA.push(Array(HEADERS.length).fill("")); renderBodies(); saveDataToGitHub(); }
-function deleteRowContext() { if(confirm("Delete Row?")) { DATA.splice(activeCell.parentElement.dataset.index, 1); renderBodies(); saveDataToGitHub(); }}
-
-window.onload = () => { startClock(); loadAllData(); };
+window.onload = () => { startClock(); loadData(); };
 </script>
 </body>
 </html>
