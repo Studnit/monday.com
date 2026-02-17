@@ -3,84 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurus Tracker Pro | Category-Wise Excel Grid</title>
+<title>Aurus Tracker Pro | Advanced Grid & Admin Tools</title>
 <style>
 :root { --excel-green: #217346; --bg: #f4f7f6; --text: #1a202c; --border: #cbd5e0; }
-body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
 
-/* HEADER & DASHBOARD */
-.header-container { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-#liveClock { font-weight: 700; color: #4a5568; background: #edf2f7; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
+/* HEADER */
+.header-container { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; position: sticky; top: 0; z-index: 1000; }
+#liveClock { font-weight: 700; color: #4a5568; background: #edf2f7; padding: 6px 12px; border-radius: 20px; font-size: 13px; }
 
-/* SEARCH & ADMIN CONTROLS */
-.controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; }
-#searchInput { padding: 10px 15px; border: 2px solid var(--border); border-radius: 8px; width: 300px; outline: none; font-size: 14px; transition: 0.3s; }
-#searchInput:focus { border-color: var(--excel-green); }
-
-/* STATUS SECTIONS */
-.status-section { background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; border: 1px solid var(--border); }
-.section-header { padding: 12px 20px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; font-size: 14px; letter-spacing: 0.5px; }
+/* TABLES & CATEGORIES */
+.status-section { background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 25px; overflow: hidden; border: 1px solid var(--border); }
+.section-header { padding: 10px 20px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; font-size: 14px; }
 .bg-working { background: #3182ce; } .bg-done { background: var(--excel-green); } .bg-stuck { background: #e53e3e; }
 
-/* GRID STYLING & FREEZE */
-.table-wrapper { overflow-x: auto; max-height: 45vh; }
-table { width: 100%; border-collapse: collapse; min-width: 1600px; }
-th { background: #34495e; color: white; font-size: 11px; text-transform: uppercase; padding: 12px; border: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.table-wrapper { overflow: auto; max-height: 45vh; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1750px; table-layout: fixed; }
 
-/* Frozen Columns */
-th:nth-child(-n+3), td:nth-child(-n+3) { position: sticky; left: 0; z-index: 5; border-right: 2px solid var(--border); }
-th:nth-child(2), td:nth-child(2) { left: 60px; } 
+/* FREEZE & COLUMNS */
+th { background: #34495e; color: white; font-size: 11px; text-transform: uppercase; padding: 12px; border: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+th:nth-child(-n+3), td:nth-child(-n+3) { position: sticky; left: 0; z-index: 40; border-right: 1px solid var(--border) !important; }
+th:nth-child(2), td:nth-child(2) { left: 50px; } 
 th:nth-child(3), td:nth-child(3) { left: 140px; }
-th:nth-child(-n+3) { z-index: 11; }
+th:nth-child(-n+3) { z-index: 101; background: #34495e; }
 
-/* Cell Colors */
-td { padding: 8px; border: 1px solid var(--border); font-size: 13px; text-align: center; }
-td:nth-child(1) { background: #ebf5fb; font-weight: bold; } 
-td:nth-child(2) { background: #fdf2f2; } 
-td:nth-child(3) { background: #e8f4fd; text-align: left; font-weight: 600; } 
+/* ADVANCED COLORING */
+td { padding: 8px; border: 1px solid var(--border); font-size: 13px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: white; }
+td:nth-child(1) { background: #ebf5fb !important; font-weight: bold; width: 50px; } 
+td:nth-child(2) { background: #fdf2f2 !important; width: 90px; } 
+td:nth-child(3) { background: #e8f4fd !important; text-align: left; font-weight: 600; width: 350px; }
 
-/* HEATMAP */
 .bg-yes { background-color: #2ecc71 !important; color: white !important; font-weight: bold; }
 .bg-no { background-color: #e74c3c !important; color: white !important; font-weight: bold; }
 .bg-working-cell { background-color: #f39c12 !important; color: white !important; }
 .bg-done-cell { background-color: #27ae60 !important; color: white !important; }
+.bg-stuck-cell { background-color: #c0392b !important; color: white !important; }
 
-/* INPUTS */
-select, input[type="date"] { width: 100%; border: none; background: transparent; font-family: inherit; text-align: center; cursor: pointer; }
-.btn-admin { background: #2d3748; color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; font-size: 13px; }
-
-.suggestion-box { position: absolute; background: white; border: 1px solid #cbd5e0; z-index: 5000; max-height: 150px; overflow-y: auto; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-radius: 6px; min-width: 200px; list-style: none; padding: 0; margin: 0; text-align: left; }
-.suggestion-box li { padding: 10px 15px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #edf2f7; }
-.suggestion-box li:hover { background: #ebf8ff; color: #3182ce; }
+/* MODAL & BUTTONS */
+.modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10001; align-items:center; justify-content:center; }
+.modal-box { background:#fff; padding:25px; border-radius:12px; width:400px; border-top:6px solid var(--excel-green); }
+.name-pill { display:inline-block; background:#edf2f7; padding:5px 10px; border-radius:15px; margin:3px; font-size:11px; font-weight:700; }
+.btn { padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; font-size: 12px; }
+.btn-save { background: var(--excel-green); color: #fff; }
+.btn-admin { background: #2d3748; color: #fff; }
+select, input[type="date"] { width: 100%; border: none; background: transparent; font-family: inherit; text-align: center; color: inherit; }
 </style>
 </head>
 <body>
 
+<div id="teamModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin:0 0 15px 0;">👥 Team Management</h3>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="newNameInput" placeholder="Add Name..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px;">
+            <button class="btn btn-save" onclick="addNewName()">Add</button>
+        </div>
+        <div id="namesContainer" style="max-height:200px; overflow-y:auto; border:1px solid #eee; padding:5px;"></div>
+        <div style="margin-top:15px; text-align:right;">
+            <button class="btn btn-admin" onclick="document.getElementById('teamModal').style.display='none'">Close</button>
+        </div>
+    </div>
+</div>
+
 <div class="header-container">
   <div>
-    <h1>Aurus <span style="color:var(--excel-green)">Dashboard Pro</span></h1>
-    <div style="display:flex; gap:15px; margin-top:5px; align-items:center;">
-        <div id="liveClock">Loading Clock...</div>
+    <h1 style="margin:0; font-size:20px;">Aurus Certification <span style="color:var(--excel-green)">Pro Grid</span></h1>
+    <div style="display:flex; gap:12px; margin-top:4px; align-items:center;">
+        <div id="liveClock">Loading...</div>
         <div id="syncStatus" style="font-size:11px; font-weight:bold; color:#718096;">Sync: Ready</div>
     </div>
   </div>
-  <div style="display:flex; gap:10px;">
-    <button id="adminSaveBtn" class="btn-admin" style="display:none; background:var(--excel-green);" onclick="saveToGitHub()">🚀 Force Commit</button>
-    <button id="adminBtn" class="btn-admin" onclick="toggleAdmin()">🔒 Admin Login</button>
+  <div style="display:flex; gap:8px;">
+    <button id="manageNamesBtn" class="btn btn-save" style="display:none;" onclick="document.getElementById('teamModal').style.display='flex'">👥 Manage Names</button>
+    <button id="forceCommitBtn" class="btn btn-save" style="display:none; background:#3182ce;" onclick="saveToGitHub()">🚀 Force Commit</button>
+    <button id="adminBtn" class="btn btn-admin" onclick="toggleAdmin()">🔒 Admin Login</button>
   </div>
 </div>
 
-<div class="controls">
-    <input type="text" id="searchInput" placeholder="🔍 Search projects, developers, or status..." oninput="renderBodies()">
-</div>
-
 <div class="status-section">
-    <div class="section-header bg-working"><span>⏳ IN-PROGRESS & QUEUED</span><span id="countWorking">0</span></div>
+    <div class="section-header bg-working"><span>⏳ WORKING / IN-PROGRESS</span><span id="countWorking">0</span></div>
     <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-working"></tbody></table></div>
 </div>
 
 <div class="status-section">
-    <div class="section-header bg-done"><span>✅ COMPLETED PROJECTS</span><span id="countDone">0</span></div>
+    <div class="section-header bg-done"><span>✅ COMPLETED</span><span id="countDone">0</span></div>
     <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-completed"></tbody></table></div>
 </div>
 
@@ -102,10 +108,11 @@ function startClock() {
     }, 1000);
 }
 
-async function loadAllData() {
+async function loadData() {
     try {
         const nameRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`);
         TEAM_NAMES = JSON.parse(atob((await nameRes.json()).content));
+        renderNames();
 
         const dataRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`);
         const content = JSON.parse(atob((await dataRes.json()).content));
@@ -113,6 +120,26 @@ async function loadAllData() {
         HEADERS = content.headers || [];
         renderHeaders(); renderBodies();
     } catch (e) { console.error("Sync Failed"); }
+}
+
+function renderNames() {
+    document.getElementById("namesContainer").innerHTML = TEAM_NAMES.map((n, i) => `<span class="name-pill">${n} <span style="cursor:pointer;color:red" onclick="removeName(${i})">✖</span></span>`).join('');
+}
+
+function addNewName() {
+    const val = document.getElementById("newNameInput").value.trim();
+    if(val && !TEAM_NAMES.includes(val)) { TEAM_NAMES.push(val); TEAM_NAMES.sort(); document.getElementById("newNameInput").value=""; renderNames(); saveNamesToGitHub(); }
+}
+
+function removeName(i) { if(confirm("Remove?")) { TEAM_NAMES.splice(i,1); renderNames(); saveNamesToGitHub(); } }
+
+async function saveNamesToGitHub() {
+    if(!admin) return;
+    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`;
+    const res = await fetch(url, { headers: {'Authorization': `token ${GITHUB_TOKEN}`} });
+    const file = await res.json();
+    const payload = btoa(unescape(encodeURIComponent(JSON.stringify(TEAM_NAMES, null, 2))));
+    await fetch(url, { method: 'PUT', headers: {'Authorization': `token ${GITHUB_TOKEN}`}, body: JSON.stringify({ message: "Team Update", content: payload, sha: file.sha }) });
 }
 
 function renderHeaders() {
@@ -125,66 +152,45 @@ function renderBodies() {
     Object.values(sections).forEach(s => s.innerHTML = "");
     let counts = { working: 0, done: 0, stuck: 0 };
     let statusIdx = HEADERS.findIndex(h => h.toLowerCase().includes("status"));
-    const query = document.getElementById("searchInput").value.toLowerCase();
 
     DATA.forEach((r, idx) => {
-        if(query && !r.join(' ').toLowerCase().includes(query)) return;
-
         const tr = document.createElement("tr");
-        tr.dataset.index = idx;
+        const sVal = (statusIdx !== -1 && r[statusIdx]) ? r[statusIdx].toLowerCase() : "";
+
         tr.innerHTML = r.map((cell, cIdx) => {
             const h = HEADERS[cIdx].toLowerCase();
             let colorCls = cell === "YES" ? "bg-yes" : (cell === "NO" ? "bg-no" : "");
             
-            if (h.includes("status") && !h.includes("week") && admin) {
-                if (cell === "Done") colorCls = "bg-done-cell";
-                else if (cell.includes("Working")) colorCls = "bg-working-cell";
-                
-                return `<td class="${colorCls}"><select onchange="updateCell(${idx}, ${cIdx}, this.value)">
-                    <option value="Working on it" ${cell==='Working on it'?'selected':''}>Working</option>
-                    <option value="Done" ${cell==='Done'?'selected':''}>Done</option>
-                    <option value="Stuck" ${cell==='Stuck'?'selected':''}>Stuck</option>
-                    <option value="Yet to Start" ${cell==='Yet to Start'?'selected':''}>Yet to Start</option>
+            if (cIdx === 0) {
+                let n = 1;
+                if (sVal === "done") n = ++counts.done;
+                else if (sVal.includes("stuck") || sVal.includes("yet")) n = ++counts.stuck;
+                else n = ++counts.working;
+                return `<td>${n}</td>`;
+            }
+
+            if (h.includes("status") && !h.includes("week")) {
+                if (sVal === "done") colorCls = "bg-done-cell";
+                else if (sVal.includes("working")) colorCls = "bg-working-cell";
+                else if (sVal.includes("stuck") || sVal.includes("yet")) colorCls = "bg-stuck-cell";
+                return `<td class="${colorCls}"><select onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin?'disabled':''}>
+                    <option value="Working on it" ${r[statusIdx]==='Working on it'?'selected':''}>Working</option>
+                    <option value="Done" ${r[statusIdx]==='Done'?'selected':''}>Done</option>
+                    <option value="Stuck" ${r[statusIdx]==='Stuck'?'selected':''}>Stuck</option>
                 </select></td>`;
             }
 
-            if ((h.includes("week") || h.includes("feb")) && admin) {
-                return `<td class="${colorCls}"><select onchange="updateCell(${idx}, ${cIdx}, this.value)" class="${colorCls}">
-                    <option value=""></option><option value="YES" ${cell==='YES'?'selected':''}>YES</option>
-                    <option value="NO" ${cell==='NO'?'selected':''}>NO</option><option value="NA" ${cell==='NA'?'selected':''}>NA</option>
-                </select></td>`;
-            }
-
-            const isName = h.includes("name") && !h.includes("project");
-            return `<td contenteditable="${admin}" class="${colorCls}" 
-                    oninput="${isName ? `handleNameInput(event, ${idx}, ${cIdx})` : `updateCell(${idx}, ${cIdx}, this.innerText)`}">${cell}</td>`;
+            if (h.includes("date") && admin) return `<td><input type="date" value="${cell}" onchange="updateCell(${idx}, ${cIdx}, this.value)"></td>`;
+            return `<td contenteditable="${admin}" class="${colorCls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
         }).join('');
         
-        const status = (statusIdx !== -1 && r[statusIdx]) ? r[statusIdx].toLowerCase() : "";
-        if (status === "done") { sections.done.appendChild(tr); counts.done++; }
-        else if (status.includes("stuck") || status.includes("yet")) { sections.stuck.appendChild(tr); counts.stuck++; }
-        else { sections.working.appendChild(tr); counts.working++; }
+        if (sVal === "done") sections.done.appendChild(tr);
+        else if (sVal.includes("stuck") || sVal.includes("yet")) sections.stuck.appendChild(tr);
+        else sections.working.appendChild(tr);
     });
     document.getElementById("countWorking").innerText = counts.working;
     document.getElementById("countDone").innerText = counts.done;
     document.getElementById("countStuck").innerText = counts.stuck;
-}
-
-function handleNameInput(e, rIdx, cIdx) {
-    const query = e.target.innerText.trim().toLowerCase();
-    const cell = e.target;
-    document.querySelectorAll('.suggestion-box').forEach(b => b.remove());
-    if (query.length < 1) return;
-    const matches = TEAM_NAMES.filter(name => name.toLowerCase().includes(query));
-    if (matches.length > 0) {
-        const box = document.createElement('ul'); box.className = 'suggestion-box';
-        matches.forEach(m => {
-            const li = document.createElement('li'); li.innerText = m;
-            li.onclick = () => { cell.innerText = m; updateCell(rIdx, cIdx, m); box.remove(); };
-            box.appendChild(li);
-        });
-        cell.appendChild(box);
-    }
 }
 
 function updateCell(rIdx, cIdx, val) {
@@ -196,30 +202,27 @@ function updateCell(rIdx, cIdx, val) {
 
 async function saveToGitHub() {
     if (!admin) return;
-    document.getElementById("syncStatus").innerText = "Sync: 📤 Saving...";
     const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
     try {
         const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
         const fileData = await res.json();
         const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ headers: HEADERS, data: DATA }, null, 2))));
-        await fetch(url, {
-            method: 'PUT',
-            headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Category Grid Sync", content: payload, sha: fileData.sha })
-        });
+        await fetch(url, { method: 'PUT', headers: { 'Authorization': `token ${GITHUB_TOKEN}` }, body: JSON.stringify({ message: "Sync", content: payload, sha: fileData.sha }) });
         document.getElementById("syncStatus").innerText = "Sync: ✅ Saved " + new Date().toLocaleTimeString();
-    } catch (e) { document.getElementById("syncStatus").innerText = "Sync: ❌ Error"; }
+    } catch (e) { }
 }
 
 function toggleAdmin() {
-    if(!admin && prompt("Admin Pass:") === "admin123") { 
+    if(!admin && prompt("Pass:") === "admin123") { 
         admin = true; 
-        document.getElementById("adminSaveBtn").style.display = "block";
-    } else { admin = false; document.getElementById("adminSaveBtn").style.display = "none"; }
+        document.getElementById("manageNamesBtn").style.display = "block";
+        document.getElementById("forceCommitBtn").style.display = "block";
+        document.getElementById("adminBtn").innerText = "🔓 Logout";
+    } else { admin = false; document.getElementById("manageNamesBtn").style.display = "none"; document.getElementById("forceCommitBtn").style.display = "none"; document.getElementById("adminBtn").innerText = "🔒 Login"; }
     renderBodies();
 }
 
-window.onload = () => { startClock(); loadAllData(); };
+window.onload = () => { startClock(); loadData(); };
 </script>
 </body>
 </html>
