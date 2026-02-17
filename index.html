@@ -3,54 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurus Tracker Pro | Fully Colored Excel Grid</title>
+<title>Aurus Tracker Pro | Category-Wise Excel Grid</title>
 <style>
 :root { --excel-green: #217346; --bg: #f4f7f6; --text: #1a202c; --border: #cbd5e0; }
 body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
 
-/* HEADER */
+/* HEADER & DASHBOARD */
 .header-container { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
 #liveClock { font-weight: 700; color: #4a5568; background: #edf2f7; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
 
-/* TABLE WRAPPER & FREEZE */
-.table-wrapper { overflow-x: auto; max-height: 50vh; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-table { width: 100%; border-collapse: collapse; min-width: 1600px; background: white; }
+/* SEARCH & ADMIN CONTROLS */
+.controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; }
+#searchInput { padding: 10px 15px; border: 2px solid var(--border); border-radius: 8px; width: 300px; outline: none; font-size: 14px; transition: 0.3s; }
+#searchInput:focus { border-color: var(--excel-green); }
+
+/* STATUS SECTIONS */
+.status-section { background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; border: 1px solid var(--border); }
+.section-header { padding: 12px 20px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; font-size: 14px; letter-spacing: 0.5px; }
+.bg-working { background: #3182ce; } .bg-done { background: var(--excel-green); } .bg-stuck { background: #e53e3e; }
+
+/* GRID STYLING & FREEZE */
+.table-wrapper { overflow-x: auto; max-height: 45vh; }
+table { width: 100%; border-collapse: collapse; min-width: 1600px; }
 th { background: #34495e; color: white; font-size: 11px; text-transform: uppercase; padding: 12px; border: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
 
-/* Frozen Columns Styles */
+/* Frozen Columns */
 th:nth-child(-n+3), td:nth-child(-n+3) { position: sticky; left: 0; z-index: 5; border-right: 2px solid var(--border); }
 th:nth-child(2), td:nth-child(2) { left: 60px; } 
 th:nth-child(3), td:nth-child(3) { left: 140px; }
 th:nth-child(-n+3) { z-index: 11; }
 
 /* Cell Colors */
-td { padding: 8px; border: 1px solid var(--border); font-size: 13px; text-align: center; color: #2d3748; }
-td:nth-child(1) { background: #ebf5fb; font-weight: bold; } /* SR NO */
-td:nth-child(2) { background: #fdf2f2; } /* EP ID */
-td:nth-child(3) { background: #e8f4fd; text-align: left; font-weight: 600; } /* Name */
+td { padding: 8px; border: 1px solid var(--border); font-size: 13px; text-align: center; }
+td:nth-child(1) { background: #ebf5fb; font-weight: bold; } 
+td:nth-child(2) { background: #fdf2f2; } 
+td:nth-child(3) { background: #e8f4fd; text-align: left; font-weight: 600; } 
 
-/* Heatmap Classes */
+/* HEATMAP */
 .bg-yes { background-color: #2ecc71 !important; color: white !important; font-weight: bold; }
 .bg-no { background-color: #e74c3c !important; color: white !important; font-weight: bold; }
-.bg-na { background-color: #bdc3c7 !important; color: #2c3e50 !important; }
-.bg-working { background-color: #f39c12 !important; color: white !important; font-weight: bold; }
-.bg-done { background-color: #27ae60 !important; color: white !important; font-weight: bold; }
-.bg-stuck { background-color: #c0392b !important; color: white !important; font-weight: bold; }
+.bg-working-cell { background-color: #f39c12 !important; color: white !important; }
+.bg-done-cell { background-color: #27ae60 !important; color: white !important; }
 
 /* INPUTS */
 select, input[type="date"] { width: 100%; border: none; background: transparent; font-family: inherit; text-align: center; cursor: pointer; }
-.btn-admin { background: #2d3748; color: #fff; padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
-#syncStatus { font-size: 11px; font-weight: bold; color: #718096; margin-left: 10px; }
+.btn-admin { background: #2d3748; color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; font-size: 13px; }
+
+.suggestion-box { position: absolute; background: white; border: 1px solid #cbd5e0; z-index: 5000; max-height: 150px; overflow-y: auto; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-radius: 6px; min-width: 200px; list-style: none; padding: 0; margin: 0; text-align: left; }
+.suggestion-box li { padding: 10px 15px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #edf2f7; }
+.suggestion-box li:hover { background: #ebf8ff; color: #3182ce; }
 </style>
 </head>
 <body>
 
 <div class="header-container">
   <div>
-    <h1>Aurus Certification <span style="color:var(--excel-green)">Grid Pro</span></h1>
+    <h1>Aurus <span style="color:var(--excel-green)">Dashboard Pro</span></h1>
     <div style="display:flex; gap:15px; margin-top:5px; align-items:center;">
         <div id="liveClock">Loading Clock...</div>
-        <div id="syncStatus">Sync: Ready</div>
+        <div id="syncStatus" style="font-size:11px; font-weight:bold; color:#718096;">Sync: Ready</div>
     </div>
   </div>
   <div style="display:flex; gap:10px;">
@@ -59,11 +70,23 @@ select, input[type="date"] { width: 100%; border: none; background: transparent;
   </div>
 </div>
 
-<div class="table-wrapper">
-    <table>
-        <thead><tr class="hRow"></tr></thead>
-        <tbody id="mainBody"></tbody>
-    </table>
+<div class="controls">
+    <input type="text" id="searchInput" placeholder="🔍 Search projects, developers, or status..." oninput="renderBodies()">
+</div>
+
+<div class="status-section">
+    <div class="section-header bg-working"><span>⏳ IN-PROGRESS & QUEUED</span><span id="countWorking">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-working"></tbody></table></div>
+</div>
+
+<div class="status-section">
+    <div class="section-header bg-done"><span>✅ COMPLETED PROJECTS</span><span id="countDone">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-completed"></tbody></table></div>
+</div>
+
+<div class="status-section">
+    <div class="section-header bg-stuck"><span>🛑 STUCK / YET TO START</span><span id="countStuck">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-stuck"></tbody></table></div>
 </div>
 
 <script>
@@ -79,7 +102,7 @@ function startClock() {
     }, 1000);
 }
 
-async function loadData() {
+async function loadAllData() {
     try {
         const nameRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`);
         TEAM_NAMES = JSON.parse(atob((await nameRes.json()).content));
@@ -88,36 +111,36 @@ async function loadData() {
         const content = JSON.parse(atob((await dataRes.json()).content));
         DATA = content.data || [];
         HEADERS = content.headers || [];
-        
         renderHeaders(); renderBodies();
     } catch (e) { console.error("Sync Failed"); }
 }
 
 function renderHeaders() {
-    document.querySelector(".hRow").innerHTML = HEADERS.map(h => `<th>${h}</th>`).join('');
+    const html = HEADERS.map(h => `<th>${h}</th>`).join('');
+    document.querySelectorAll(".hRow").forEach(el => el.innerHTML = html);
 }
 
 function renderBodies() {
-    const body = document.getElementById("mainBody");
-    body.innerHTML = "";
-    
+    const sections = { working: document.getElementById("tb-working"), done: document.getElementById("tb-completed"), stuck: document.getElementById("tb-stuck") };
+    Object.values(sections).forEach(s => s.innerHTML = "");
+    let counts = { working: 0, done: 0, stuck: 0 };
+    let statusIdx = HEADERS.findIndex(h => h.toLowerCase().includes("status"));
+    const query = document.getElementById("searchInput").value.toLowerCase();
+
     DATA.forEach((r, idx) => {
+        if(query && !r.join(' ').toLowerCase().includes(query)) return;
+
         const tr = document.createElement("tr");
+        tr.dataset.index = idx;
         tr.innerHTML = r.map((cell, cIdx) => {
             const h = HEADERS[cIdx].toLowerCase();
-            let colorCls = "";
+            let colorCls = cell === "YES" ? "bg-yes" : (cell === "NO" ? "bg-no" : "");
             
-            // Conditional Formatting Logic
-            if (cell === "YES") colorCls = "bg-yes";
-            else if (cell === "NO") colorCls = "bg-no";
-            else if (cell === "NA") colorCls = "bg-na";
-            
-            if (h.includes("status") && !h.includes("week")) {
-                if (cell === "Done") colorCls = "bg-done";
-                else if (cell === "Working on it") colorCls = "bg-working";
-                else if (cell === "Stuck") colorCls = "bg-stuck";
+            if (h.includes("status") && !h.includes("week") && admin) {
+                if (cell === "Done") colorCls = "bg-done-cell";
+                else if (cell.includes("Working")) colorCls = "bg-working-cell";
                 
-                return `<td class="${colorCls}"><select onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin ? 'disabled' : ''}>
+                return `<td class="${colorCls}"><select onchange="updateCell(${idx}, ${cIdx}, this.value)">
                     <option value="Working on it" ${cell==='Working on it'?'selected':''}>Working</option>
                     <option value="Done" ${cell==='Done'?'selected':''}>Done</option>
                     <option value="Stuck" ${cell==='Stuck'?'selected':''}>Stuck</option>
@@ -132,15 +155,41 @@ function renderBodies() {
                 </select></td>`;
             }
 
-            return `<td contenteditable="${admin}" class="${colorCls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
+            const isName = h.includes("name") && !h.includes("project");
+            return `<td contenteditable="${admin}" class="${colorCls}" 
+                    oninput="${isName ? `handleNameInput(event, ${idx}, ${cIdx})` : `updateCell(${idx}, ${cIdx}, this.innerText)`}">${cell}</td>`;
         }).join('');
-        body.appendChild(tr);
+        
+        const status = (statusIdx !== -1 && r[statusIdx]) ? r[statusIdx].toLowerCase() : "";
+        if (status === "done") { sections.done.appendChild(tr); counts.done++; }
+        else if (status.includes("stuck") || status.includes("yet")) { sections.stuck.appendChild(tr); counts.stuck++; }
+        else { sections.working.appendChild(tr); counts.working++; }
     });
+    document.getElementById("countWorking").innerText = counts.working;
+    document.getElementById("countDone").innerText = counts.done;
+    document.getElementById("countStuck").innerText = counts.stuck;
+}
+
+function handleNameInput(e, rIdx, cIdx) {
+    const query = e.target.innerText.trim().toLowerCase();
+    const cell = e.target;
+    document.querySelectorAll('.suggestion-box').forEach(b => b.remove());
+    if (query.length < 1) return;
+    const matches = TEAM_NAMES.filter(name => name.toLowerCase().includes(query));
+    if (matches.length > 0) {
+        const box = document.createElement('ul'); box.className = 'suggestion-box';
+        matches.forEach(m => {
+            const li = document.createElement('li'); li.innerText = m;
+            li.onclick = () => { cell.innerText = m; updateCell(rIdx, cIdx, m); box.remove(); };
+            box.appendChild(li);
+        });
+        cell.appendChild(box);
+    }
 }
 
 function updateCell(rIdx, cIdx, val) {
     DATA[rIdx][cIdx] = val;
-    renderBodies(); // Re-render to update colors instantly
+    if(HEADERS[cIdx].toLowerCase().includes("status")) renderBodies(); 
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(saveToGitHub, 2000);
 }
@@ -156,7 +205,7 @@ async function saveToGitHub() {
         await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Color Grid Sync", content: payload, sha: fileData.sha })
+            body: JSON.stringify({ message: "Category Grid Sync", content: payload, sha: fileData.sha })
         });
         document.getElementById("syncStatus").innerText = "Sync: ✅ Saved " + new Date().toLocaleTimeString();
     } catch (e) { document.getElementById("syncStatus").innerText = "Sync: ❌ Error"; }
@@ -170,7 +219,7 @@ function toggleAdmin() {
     renderBodies();
 }
 
-window.onload = () => { startClock(); loadData(); };
+window.onload = () => { startClock(); loadAllData(); };
 </script>
 </body>
 </html>
