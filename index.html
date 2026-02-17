@@ -3,21 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurus Tracker Pro - Fixed Sync</title>
+<title>Aurus Tracker Pro - Live Clock & Sync</title>
 <style>
 :root { --excel-green: #217346; --bg-color: #f4f7f6; --text-dark: #2c3e50; }
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); padding: 20px 40px; }
 
-/* HEADER & STATS */
+/* HEADER & DASHBOARD */
 .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .dashboard { display: flex; gap: 15px; align-items: center; }
 .stat-box { background: #fff; padding: 10px 18px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-weight: bold; border-left: 5px solid #3498db; }
+
+/* CLOCK STYLE */
+#liveClock { font-size: 16px; color: var(--text-dark); font-weight: 600; background: #fff; padding: 10px 15px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-bottom: 3px solid var(--excel-green); }
 
 /* INDICATORS */
 #autosaveIndicator { font-size: 12px; color: #27ae60; font-weight: bold; opacity: 0; transition: 0.3s; }
 #syncStatus { font-size: 11px; color: #e67e22; margin-left: 10px; font-weight: bold; }
 
-/* BUTTONS */
 .main-btn { background: #3498db; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
 #adminSaveBtn { background: #2ecc71; display: none; margin-right: 10px; }
 
@@ -27,31 +29,26 @@ table { width: 100%; border-collapse: collapse; min-width: 1200px; }
 th, td { border: 1px solid #bdc3c7; padding: 10px; text-align: center; }
 th { background: #34495e; color: #fff; position: sticky; top: 0; }
 
-.status-done { background: #00c875 !important; color: #fff; }
-.status-working { background: #fdab3d !important; color: #fff; }
-
-/* TOAST */
 #toast { visibility: hidden; min-width: 300px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 2000; left: 50%; bottom: 30px; transform: translateX(-50%); }
-#toast.show { visibility: visible; animation: fadein 0.5s; }
-@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+#toast.show { visibility: visible; }
 </style>
 </head>
 <body>
 
-<div id="toast">Notification Message</div>
+<div id="toast">Notification</div>
 
 <div class="header-container">
   <div>
     <h1>Aurus Tracker Live</h1>
     <div class="dashboard">
-      <div class="stat-box">📊 Total: <span id="statTotal">0</span></div>
+      <div id="liveClock">Loading Clock...</div> <div class="stat-box">📊 Total: <span id="statTotal">0</span></div>
       <div class="stat-box">✅ Done: <span id="statComp">0</span></div>
-      <span id="autosaveIndicator">☁️ Saving to GitHub...</span>
-      <span id="syncStatus">Ready</span>
+      <span id="autosaveIndicator">☁️ Saving...</span>
     </div>
   </div>
   <div>
-    <button id="adminSaveBtn" class="main-btn" onclick="saveToGitHub()">🚀 Force Commit</button>
+    <span id="syncStatus">Sync: Ready</span>
+    <button id="adminSaveBtn" class="main-btn" onclick="saveToGitHub()">🚀 Commit</button>
     <button id="adminBtn" class="main-btn" onclick="toggleAdmin()">🔒 Admin Login</button>
   </div>
 </div>
@@ -65,94 +62,94 @@ th { background: #34495e; color: #fff; position: sticky; top: 0; }
 
 <script>
 const GH_CONFIG = { owner: 'Studnit', repo: 'monday.com', path: 'data.json' };
-
-// PASTE YOUR TOKEN HERE
 const GITHUB_TOKEN = "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"; 
 
 let DATA = [];
 let HEADERS = ["SR NO", "EP ID", "Certification Name", "Start Date", "End Date", "Project Status", "Developer", "Lead", "Week 1", "Week 2"];
 let admin = false, autosaveTimer = null;
 
-// --- GITHUB SYNC LOGIC ---
+// --- 1. LIVE CLOCK FUNCTION ---
+function startClock() {
+    setInterval(() => {
+        const now = new Date();
+        const options = { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit',
+            hour12: true 
+        };
+        document.getElementById('liveClock').innerText = "📅 " + now.toLocaleString('en-IN', options);
+    }, 1000);
+}
 
-
+// --- 2. GITHUB SYNC LOGIC ---
 async function loadFromGitHub() {
-    updateSyncStatus("⏳ Loading data...");
+    updateSyncStatus("⏳ Loading...");
     const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
     try {
         const res = await fetch(url);
-        if(!res.ok) throw new Error("File not found");
         const json = await res.json();
         const content = JSON.parse(atob(json.content));
         DATA = content.data || [];
         renderBodies();
-        updateSyncStatus("✅ Live");
-        showToast("Connected to GitHub Successfully");
+        updateSyncStatus("✅ Live Synced");
     } catch (e) {
-        updateSyncStatus("⚠️ Error Loading");
-        showToast("GitHub Connection Failed. Check if data.json exists.", "error");
+        updateSyncStatus("❌ Offline");
     }
 }
 
 async function saveToGitHub(isAutosave = false) {
-    if (!admin || GITHUB_TOKEN.includes("YOUR_TOKEN")) {
-        showToast("Error: No Token Provided", "error");
-        return;
-    }
+    if (!admin || GITHUB_TOKEN.includes("YOUR_TOKEN")) return;
 
     updateSyncStatus("📤 Committing...");
     const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`;
     
     try {
-        // 1. Get SHA (Required by GitHub for every update)
         const getRes = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
         const fileData = await getRes.json();
         const sha = fileData.sha;
 
-        // 2. Prepare Payload
         const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ headers: HEADERS, data: DATA }, null, 2))));
 
-        // 3. Write Data
         const putRes = await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Admin update", content: payload, sha: sha })
+            body: JSON.stringify({ message: "Tracker Update", content: payload, sha: sha })
         });
 
         if (putRes.ok) {
-            updateSyncStatus("✅ Saved: " + new Date().toLocaleTimeString());
+            updateSyncStatus("✅ Saved at " + new Date().toLocaleTimeString());
             if(isAutosave) {
                 document.getElementById("autosaveIndicator").style.opacity = "1";
                 setTimeout(() => document.getElementById("autosaveIndicator").style.opacity = "0", 1500);
-            } else {
-                showToast("🚀 Data Pushed to GitHub Repository!");
             }
-        } else {
-            throw new Error();
         }
     } catch (e) {
-        updateSyncStatus("❌ Save Failed");
-        showToast("Write Error: Check Token Permissions (repo scope)", "error");
+        updateSyncStatus("❌ Write Error");
     }
 }
 
-// --- UI ENGINE ---
+// --- 3. UI ENGINE ---
+function renderHeaders() {
+    document.getElementById("hRow").innerHTML = HEADERS.map(h => `<th>${h}</th>`).join('');
+}
+
 function renderBodies() {
-    const hRow = document.getElementById("hRow");
     const tBody = document.getElementById("tBody");
-    hRow.innerHTML = HEADERS.map(h => `<th>${h}</th>`).join('');
-    
     tBody.innerHTML = "";
     DATA.forEach((r, idx) => {
         const tr = document.createElement("tr");
         tr.innerHTML = r.map((cell, cIdx) => {
             const isStatus = cIdx === 5;
-            let cls = isStatus && cell.toLowerCase() === "done" ? "status-done" : (isStatus ? "status-working" : "");
+            let cls = isStatus && cell.toLowerCase() === "done" ? "status-done" : "";
             return `<td contenteditable="${admin}" class="${cls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
         }).join('');
         tBody.appendChild(tr);
     });
-    
     document.getElementById("statTotal").innerText = DATA.length;
     document.getElementById("statComp").innerText = DATA.filter(r => r[5]?.toLowerCase() === "done").length;
 }
@@ -165,11 +162,10 @@ function updateCell(rIdx, cIdx, val) {
 
 function toggleAdmin() {
     if(!admin) {
-        if(prompt("Enter Admin Password:") === "admin123") {
+        if(prompt("Admin Password:") === "admin123") {
             admin = true;
             document.getElementById("adminBtn").innerText = "🔓 Exit Admin";
             document.getElementById("adminSaveBtn").style.display = "inline-block";
-            showToast("Admin Permissions Active");
         }
     } else {
         admin = false;
@@ -179,17 +175,14 @@ function toggleAdmin() {
     renderBodies();
 }
 
-function updateSyncStatus(msg) { document.getElementById("syncStatus").innerText = msg; }
+function updateSyncStatus(msg) { document.getElementById("syncStatus").innerText = "Sync: " + msg; }
 
-function showToast(msg, type="success") {
-    const t = document.getElementById("toast");
-    t.innerText = msg;
-    t.style.background = type === "success" ? "#27ae60" : "#e74c3c";
-    t.className = "show";
-    setTimeout(() => { t.className = ""; }, 3000);
-}
-
-window.onload = loadFromGitHub;
+// --- INITIALIZE ---
+window.onload = () => {
+    startClock();
+    renderHeaders();
+    loadFromGitHub();
+};
 </script>
 </body>
 </html>
