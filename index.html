@@ -1,267 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aurus Tracker Pro | Admin Edit Edition</title>
-    <style>
-        :root { 
-            --primary: #2563eb; 
-            --bg: #f8fafc; 
-            --surface: #ffffff; 
-            --border: #e2e8f0; 
-            --text: #1e293b; 
-            --text-light: #64748b;
-            --st-working: #ffad33; 
-            --st-done: #00ca72;    
-            --st-stuck: #df2f4a;   
-            --st-yet: #94a3b8;     
-            --wk-yes-bg: #c6f6d5; --wk-yes-txt: #22543d;
-            --wk-no-bg: #fed7d7;  --wk-no-txt: #822727;
-            --wk-na-bg: #f1f5f9;  --wk-na-txt: #475569;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurus Tracker Pro | Smart Grid</title>
+<style>
+:root { --excel-green: #217346; --bg: #f4f7f6; --text: #1a202c; --border: #cbd5e0; }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
 
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+/* HEADER */
+.header-container { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; position: sticky; top: 0; z-index: 1000; }
+#liveClock { font-weight: 700; color: #4a5568; background: #edf2f7; padding: 6px 12px; border-radius: 20px; font-size: 13px; }
 
-        /* UI COMPONENTS */
-        .header-main { background: var(--surface); padding: 15px 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .search-bar { background: #f1f5f9; border: 1px solid var(--border); padding: 8px 15px; border-radius: 8px; width: 300px; outline: none; }
-        .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
-        .btn-primary { background: var(--primary); color: white; border: none; }
-        .btn-green { background: var(--st-done); color: white; border: none; }
-        .btn-amber { background: #f59e0b; color: white; border: none; }
+/* TABLES */
+.status-section { background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 25px; overflow: hidden; border: 1px solid var(--border); }
+.section-header { padding: 10px 20px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; font-size: 14px; }
+.bg-working { background: #3182ce; } .bg-done { background: var(--excel-green); } .bg-stuck { background: #e53e3e; }
 
-        /* TABLE STYLING */
-        .table-section { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .table-header { padding: 12px 20px; font-weight: 800; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .scroll-area { overflow: auto; max-height: 500px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; min-width: 1700px; }
+.table-wrapper { overflow: auto; max-height: 45vh; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1750px; table-layout: fixed; }
 
-        /* STICKY COLUMNS */
-        thead th { position: sticky; top: 0; z-index: 50; background: #f1f5f9; color: var(--text-light); padding: 12px; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid var(--border); border-right: 1px solid var(--border); }
-        td:nth-child(1), th:nth-child(1) { position: sticky; left: 0; z-index: 40; background: #f8fafc !important; width: 50px; text-align: center; }
-        td:nth-child(2), th:nth-child(2) { position: sticky; left: 50px; z-index: 40; background: #f8fafc !important; width: 110px; }
-        td:nth-child(3), th:nth-child(3) { position: sticky; left: 160px; z-index: 40; background: #fff !important; text-align: left; border-right: 3px solid var(--primary) !important; font-weight: 700; width: 420px; }
-        
-        td { padding: 10px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); font-size: 13px; background: #fff; }
+th { background: #34495e; color: white; font-size: 11px; text-transform: uppercase; padding: 12px; border: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+th:nth-child(-n+3), td:nth-child(-n+3) { position: sticky; left: 0; z-index: 40; border-right: 1px solid var(--border) !important; }
+th:nth-child(2), td:nth-child(2) { left: 50px; } 
+th:nth-child(3), td:nth-child(3) { left: 140px; }
 
-        /* ADMIN EDITABLE STYLE */
-        .admin-on [contenteditable="true"] { background: #fffdf0; outline: 1px dashed #2563eb; cursor: text; }
-        .admin-on [contenteditable="true"]:focus { background: #fff; outline: 2px solid #2563eb; }
+/* CELL STYLING */
+td { padding: 8px; border: 1px solid var(--border); font-size: 13px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: white; }
+td:nth-child(1) { background: #ebf5fb !important; font-weight: bold; width: 50px; } 
+td:nth-child(2) { background: #fdf2f2 !important; width: 90px; } 
+td:nth-child(3) { background: #e8f4fd !important; text-align: left; font-weight: 600; width: 350px; }
 
-        /* STATUS COLORS */
-        .st-working { background-color: var(--st-working) !important; color: white !important; }
-        .st-done { background-color: var(--st-done) !important; color: white !important; }
-        .st-stuck { background-color: var(--st-stuck) !important; color: white !important; }
-        .st-yet { background-color: var(--st-yet) !important; color: white !important; }
-        .wk-yes { background-color: var(--wk-yes-bg) !important; color: var(--wk-yes-txt) !important; }
-        .wk-no { background-color: var(--wk-no-bg) !important; color: var(--wk-no-txt) !important; }
-        .wk-na { background-color: var(--wk-na-bg) !important; color: var(--wk-na-txt) !important; }
+/* STATUS COLORS */
+.bg-yes { background-color: #2ecc71 !important; color: white !important; font-weight: bold; }
+.bg-no { background-color: #e74c3c !important; color: white !important; font-weight: bold; }
+.bg-na { background-color: #95a5a6 !important; color: white !important; font-weight: bold; }
+.bg-working-cell { background-color: #f39c12 !important; color: white !important; }
+.bg-done-cell { background-color: #27ae60 !important; color: white !important; }
+.bg-stuck-cell { background-color: #c0392b !important; color: white !important; }
 
-        .status-select { border-radius: 4px; border: none; padding: 6px; width: 100%; font-weight: 700; cursor: pointer; text-align: center; outline: none; }
-        input.cell-input { width: 100%; border: none; background: transparent; text-align: center; font-family: inherit; font-size: 13px; color: inherit; }
+/* DROPDOWN & INPUTS */
+select { width: 100%; border: none; background: transparent; font-family: inherit; text-align: center; color: inherit; cursor: pointer; font-weight: bold; outline: none; }
+select option { background-color: white !important; color: black !important; font-weight: normal; }
+.date-container { display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
+.date-input-hidden { border: none; background: transparent; font-family: inherit; font-size: 13px; color: inherit; width: 100px; cursor: pointer; text-align: center; }
 
-        /* MODAL */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 10001; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; }
-    </style>
+/* MODALS */
+.modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10001; align-items:center; justify-content:center; }
+.modal-box { background:#fff; padding:25px; border-radius:12px; width:400px; border-top:6px solid var(--excel-green); }
+.btn { padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; font-size: 12px; }
+.btn-save { background: var(--excel-green); color: #fff; }
+.btn-admin { background: #2d3748; color: #fff; }
+</style>
 </head>
-<body class="admin-off" id="bodyTag">
+<body>
 
 <datalist id="teamNamesList"></datalist>
 
-<div id="nameModal" class="modal">
-    <div class="modal-content">
+<div id="teamModal" class="modal-overlay">
+    <div class="modal-box">
         <h3>👥 Team Management</h3>
-        <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input type="text" id="newNameInput" placeholder="Add Name..." style="padding:10px; border:1px solid #ddd; border-radius:8px; flex:1">
-            <button class="btn btn-primary" onclick="addNewName()">Add</button>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="newNameInput" placeholder="Add Name..." style="flex:1; padding:8px; border:1px solid #ddd;">
+            <button class="btn btn-save" onclick="addNewName()">Add</button>
         </div>
-        <div id="namesContainer" style="max-height:200px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:10px; border-radius:8px;"></div>
-        <div style="text-align:right"><button class="btn" onclick="toggleModal(false)">Close</button></div>
+        <div id="namesContainer"></div>
+        <div style="margin-top:15px; text-align:right;">
+            <button class="btn btn-admin" onclick="document.getElementById('teamModal').style.display='none'">Close</button>
+        </div>
     </div>
 </div>
 
-<header class="header-main">
-    <div>
-        <h2 style="margin:0">Aurus <span style="color:var(--primary)">Grid Pro</span></h2>
-        <div id="liveClock" style="font-size: 12px; color: var(--text-light); margin-top: 5px;"></div>
+<div class="header-container">
+  <div>
+    <h1 style="margin:0;">Aurus Certification <span style="color:var(--excel-green)">Pro Grid</span></h1>
+    <div style="display:flex; gap:12px; margin-top:4px; align-items:center;">
+        <div id="liveClock">Loading...</div>
+        <div id="syncStatus" style="font-size:11px; font-weight:bold; color:#718096;">Sync: Ready</div>
     </div>
-    <input type="text" id="globalSearch" class="search-bar" placeholder="🔍 Search Grid..." oninput="renderGrid()">
-    <div class="btn-group">
-        <button class="btn btn-amber" onclick="exportToExcel()">📊 Export Excel</button>
-        <button class="btn" id="btnManage" style="display:none" onclick="toggleModal(true)">👥 Team</button>
-        <button class="btn btn-green" id="btnCommit" style="display:none" onclick="saveToGitHub(true)">🚀 Sync</button>
-        <button class="btn btn-primary" onclick="toggleAdmin()" id="adminBtn">🔒 Admin Login</button>
-    </div>
-</header>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <button id="manageNamesBtn" class="btn btn-save" style="display:none;" onclick="document.getElementById('teamModal').style.display='flex'">👥 Manage Names</button>
+    <button id="adminBtn" class="btn btn-admin" onclick="toggleAdmin()">🔒 Admin Login</button>
+  </div>
+</div>
 
-<section class="table-section">
-    <div class="table-header" style="background: var(--st-working)"><span>⏳ WORKING</span><span id="countWorking">0</span></div>
-    <div class="scroll-area"><table id="tbl-working"><thead><tr class="hRow"></tr></thead><tbody></tbody></table></div>
-</section>
-
-<section class="table-section">
-    <div class="table-header" style="background: var(--st-done)"><span>✅ COMPLETED</span><span id="countDone">0</span></div>
-    <div class="scroll-area"><table id="tbl-done"><thead><tr class="hRow"></tr></thead><tbody></tbody></table></div>
-</section>
-
-<section class="table-section">
-    <div class="table-header" style="background: var(--st-stuck)"><span>🛑 STUCK / YET</span><span id="countStuck">0</span></div>
-    <div class="scroll-area"><table id="tbl-stuck"><thead><tr class="hRow"></tr></thead><tbody></tbody></table></div>
-</section>
+<div class="status-section">
+    <div class="section-header bg-working"><span>⏳ WORKING</span><span id="countWorking">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-working"></tbody></table></div>
+</div>
+<div class="status-section">
+    <div class="section-header bg-done"><span>✅ COMPLETED</span><span id="countDone">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-completed"></tbody></table></div>
+</div>
+<div class="status-section">
+    <div class="section-header bg-stuck"><span>🛑 STUCK / YET TO START</span><span id="countStuck">0</span></div>
+    <div class="table-wrapper"><table><thead><tr class="hRow"></tr></thead><tbody id="tb-stuck"></tbody></table></div>
+</div>
 
 <script>
-const GITHUB_TOKEN = "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"; 
 const GH_CONFIG = { owner: 'Studnit', repo: 'monday.com', dataPath: 'data.json', namePath: 'name.json' };
+const GITHUB_TOKEN = "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"; 
 
-let DATA = [], HEADERS = [], TEAM_NAMES = [], admin = false;
+let DATA = [], TEAM_NAMES = [], HEADERS = [];
+let admin = false, autosaveTimer = null;
+
+function startClock() {
+    setInterval(() => {
+        document.getElementById('liveClock').innerText = "📅 " + new Date().toLocaleString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true });
+    }, 1000);
+}
 
 async function loadData() {
     try {
-        const nRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`);
-        TEAM_NAMES = JSON.parse(atob((await nRes.json()).content));
-        renderNames();
+        const nameRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`);
+        TEAM_NAMES = JSON.parse(atob((await nameRes.json()).content));
+        updateDatalist();
         
-        const dRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`);
-        const content = JSON.parse(atob((await dRes.json()).content));
+        const dataRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`);
+        const content = JSON.parse(atob((await dataRes.json()).content));
         DATA = content.data || [];
-        HEADERS = content.headers || ["SR", "EP ID", "Certification Name", "Start", "End", "Status", "Developer", "Lead", "Week Status"];
-        renderHeaders(); renderGrid();
-    } catch (e) { console.error("Sync Error"); }
+        HEADERS = content.headers || [];
+        renderHeaders(); renderBodies();
+    } catch (e) { console.error("Sync Failed"); }
+}
+
+function updateDatalist() {
+    const list = document.getElementById('teamNamesList');
+    list.innerHTML = TEAM_NAMES.map(name => `<option value="${name}">`).join('');
 }
 
 function renderHeaders() {
     const html = HEADERS.map(h => `<th>${h}</th>`).join('');
-    document.querySelectorAll(".hRow").forEach(r => r.innerHTML = html);
+    document.querySelectorAll(".hRow").forEach(el => el.innerHTML = html);
 }
 
-function renderGrid() {
-    const term = document.getElementById('globalSearch').value.toLowerCase();
-    const bodies = { working: document.querySelector("#tbl-working tbody"), done: document.querySelector("#tbl-done tbody"), stuck: document.querySelector("#tbl-stuck tbody") };
-    Object.values(bodies).forEach(b => b.innerHTML = "");
-    let counts = { w: 0, d: 0, s: 0 };
+function renderBodies() {
+    const sections = { working: document.getElementById("tb-working"), done: document.getElementById("tb-completed"), stuck: document.getElementById("tb-stuck") };
+    Object.values(sections).forEach(s => s.innerHTML = "");
+    let counts = { working: 0, done: 0, stuck: 0 };
+    let statusIdx = HEADERS.findIndex(h => h.toLowerCase().includes("status"));
 
-    DATA.forEach((row, rIdx) => {
-        const matches = row.some(cell => String(cell).toLowerCase().includes(term));
-        if (!matches) return;
-
-        const status = (row[5] || "").toLowerCase();
+    DATA.forEach((r, idx) => {
         const tr = document.createElement("tr");
+        const sVal = (statusIdx !== -1 && r[statusIdx]) ? r[statusIdx].toLowerCase() : "";
 
-        tr.innerHTML = row.map((cell, cIdx) => {
-            // Column 0: SR (Not editable)
-            if (cIdx === 0) return `<td>${rIdx + 1}</td>`;
+        tr.innerHTML = r.map((cell, cIdx) => {
+            const h = HEADERS[cIdx].toLowerCase();
+            let colorCls = "";
             
-            // Column 5: Main Status
-            if (cIdx === 5) {
-                let badge = status === "done" ? "st-done" : (status.includes("work") ? "st-working" : (status.includes("stuck") ? "st-stuck" : "st-yet"));
-                return `<td class="${badge}">
-                    <select class="status-select ${badge}" onchange="updateRow(${rIdx}, ${cIdx}, this.value)" ${!admin?'disabled':''}>
-                        <option value="Working on it" ${row[5].includes("Work")?'selected':''}>Working on it</option>
-                        <option value="Done" ${row[5]==='Done'?'selected':''}>Done</option>
-                        <option value="Stuck" ${row[5]==='Stuck'?'selected':''}>Stuck</option>
-                        <option value="Yet to Start" ${row[5].includes("Yet")?'selected':''}>Yet to Start</option>
+            // Background logic for specific cells
+            if (cell === "YES") colorCls = "bg-yes";
+            else if (cell === "NO") colorCls = "bg-no";
+            else if (cell === "NA") colorCls = "bg-na";
+            
+            if (cIdx === 0) {
+                let n = (sVal === "done") ? ++counts.done : (sVal.includes("stuck") || sVal.includes("yet") ? ++counts.stuck : ++counts.working);
+                return `<td>${n}</td>`;
+            }
+
+            // Status Dropdown: Includes Working/Done/Stuck/YES/NO/NA
+            if (h.includes("status") && !h.includes("week")) {
+                if (sVal === "done") colorCls = "bg-done-cell";
+                else if (sVal.includes("working")) colorCls = "bg-working-cell";
+                else if (sVal.includes("stuck") || sVal.includes("yet")) colorCls = "bg-stuck-cell";
+                
+                return `<td class="${colorCls}">
+                    <select onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin?'disabled':''}>
+                        <option value="Working on it" ${r[cIdx]==='Working on it'?'selected':''}>Working on it</option>
+                        <option value="Done" ${r[cIdx]==='Done'?'selected':''}>Done</option>
+                        <option value="Stuck" ${r[cIdx]==='Stuck'?'selected':''}>Stuck</option>
+                        <option value="YES" ${r[cIdx]==='YES'?'selected':''}>YES</option>
+                        <option value="NO" ${r[cIdx]==='NO'?'selected':''}>NO</option>
+                        <option value="NA" ${r[cIdx]==='NA'?'selected':''}>NA</option>
                     </select>
                 </td>`;
             }
-            
-            // Column 8: Weekly Status
-            if (cIdx === 8) {
-                let wkCls = cell === "YES" ? "wk-yes" : (cell === "NO" ? "wk-no" : "wk-na");
-                return `<td class="${wkCls}">
-                    <select class="status-select ${wkCls}" onchange="updateRow(${rIdx}, ${cIdx}, this.value)" ${!admin?'disabled':''}>
-                        <option value="YES" ${cell==='YES'?'selected':''}>YES</option>
-                        <option value="NO" ${cell==='NO'?'selected':''}>NO</option>
-                        <option value="NA" ${cell==='NA'?'selected':''}>NA</option>
-                    </select>
-                </td>`;
-            }
 
-            // Columns 6 & 7: Developer/Lead
-            if (cIdx === 6 || cIdx === 7) {
+            // Date Picker logic
+            if (h.includes("date")) {
                 return `<td>
-                    <input class="cell-input" list="teamNamesList" value="${cell}" 
-                           onchange="updateRow(${rIdx}, ${cIdx}, this.value)" ${!admin?'disabled':''}>
+                    <div class="date-container" onclick="${admin ? "this.querySelector('input').showPicker()" : ""}">
+                        <input type="date" class="date-input-hidden" value="${cell}" 
+                               onchange="updateCell(${idx}, ${cIdx}, this.value)" ${!admin?'disabled':''}>
+                        <span>📅</span>
+                    </div>
                 </td>`;
             }
 
-            // All other columns (EP ID, Name, Start, End)
-            return `<td contenteditable="${admin}" onblur="updateRow(${rIdx}, ${cIdx}, this.innerText)">${cell}</td>`;
+            // Developer / Lead Name logic with Auto-Suggest
+            if (h.includes("developer") || h.includes("lead") || h.includes("member")) {
+                return `<td class="${colorCls}">
+                    <input list="teamNamesList" value="${cell}" 
+                           style="width:100%; border:none; background:transparent; text-align:center;"
+                           oninput="updateCell(${idx}, ${cIdx}, this.value)" 
+                           ${!admin?'disabled':''}>
+                </td>`;
+            }
+
+            return `<td contenteditable="${admin}" class="${colorCls}" oninput="updateCell(${idx}, ${cIdx}, this.innerText)">${cell}</td>`;
         }).join('');
-
-        if (status === "done") { bodies.done.appendChild(tr); counts.d++; }
-        else if (status.includes("stuck") || status.includes("yet")) { bodies.stuck.appendChild(tr); counts.s++; }
-        else { bodies.working.appendChild(tr); counts.w++; }
+        
+        if (sVal === "done") sections.done.appendChild(tr);
+        else if (sVal.includes("stuck") || sVal.includes("yet")) sections.stuck.appendChild(tr);
+        else sections.working.appendChild(tr);
     });
-    
-    document.getElementById("countWorking").innerText = counts.w;
-    document.getElementById("countDone").innerText = counts.d;
-    document.getElementById("countStuck").innerText = counts.s;
+    document.getElementById("countWorking").innerText = counts.working;
+    document.getElementById("countDone").innerText = counts.done;
+    document.getElementById("countStuck").innerText = counts.stuck;
 }
 
-function updateRow(rIdx, cIdx, val) {
-    if (DATA[rIdx][cIdx] === val) return;
+function updateCell(rIdx, cIdx, val) {
     DATA[rIdx][cIdx] = val;
-    if (cIdx === 5 || cIdx === 8) renderGrid(); 
-    saveToGitHub(false);
+    if(HEADERS[cIdx].toLowerCase().includes("status")) renderBodies(); 
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(saveToGitHub, 2000);
 }
 
-async function saveToGitHub(force) {
+async function saveToGitHub() {
     if (!admin) return;
+    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
     try {
-        const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.dataPath}`;
         const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
-        const file = await res.json();
+        const fileData = await res.json();
         const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ headers: HEADERS, data: DATA }, null, 2))));
-        await fetch(url, { method: 'PUT', headers: { 'Authorization': `token ${GITHUB_TOKEN}` }, body: JSON.stringify({ message: "Update", content: payload, sha: file.sha }) });
-        if(force) alert("Sync Successful!");
-    } catch (e) { console.error("Sync Failed"); }
+        await fetch(url, { method: 'PUT', headers: { 'Authorization': `token ${GITHUB_TOKEN}` }, body: JSON.stringify({ message: "Sync", content: payload, sha: fileData.sha }) });
+        document.getElementById("syncStatus").innerText = "Sync: ✅ Saved " + new Date().toLocaleTimeString();
+    } catch (e) { document.getElementById("syncStatus").innerText = "Sync: ❌ Error"; }
 }
 
 function toggleAdmin() {
-    if(!admin && prompt("Admin Pass:") === "admin123") {
-        admin = true;
-        document.getElementById("bodyTag").className = "admin-on";
-        document.getElementById("btnManage").style.display = "block";
-        document.getElementById("btnCommit").style.display = "block";
+    if(!admin && prompt("Pass:") === "admin123") { 
+        admin = true; 
+        document.getElementById("manageNamesBtn").style.display = "block";
+        document.getElementById("adminBtn").innerText = "🔓 Logout";
     } else { 
         admin = false; 
-        document.getElementById("bodyTag").className = "admin-off";
-        document.getElementById("btnManage").style.display = "none"; 
-        document.getElementById("btnCommit").style.display = "none"; 
+        document.getElementById("manageNamesBtn").style.display = "none";
+        document.getElementById("adminBtn").innerText = "🔒 Login"; 
     }
-    document.getElementById("adminBtn").innerText = admin ? "🔓 Logout" : "🔒 Admin Login";
-    renderGrid();
+    renderBodies();
 }
 
-function exportToExcel() {
-    let csv = HEADERS.join(",") + "\n";
-    DATA.forEach(r => csv += r.map(c => `"${c}"`).join(",") + "\n");
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `Aurus_Tracker.csv`; a.click();
-}
-
-function toggleModal(show) { document.getElementById('nameModal').style.display = show ? 'flex' : 'none'; }
-function renderNames() {
-    document.getElementById('namesContainer').innerHTML = TEAM_NAMES.map((n, i) => `<span class="name-pill">${n} <span style="cursor:pointer;color:red" onclick="removeName(${i})">✖</span></span>`).join('');
-    document.getElementById('teamNamesList').innerHTML = TEAM_NAMES.map(n => `<option value="${n}">`).join('');
-}
-function addNewName() {
-    const val = document.getElementById('newNameInput').value.trim();
-    if(val && !TEAM_NAMES.includes(val)) { TEAM_NAMES.push(val); document.getElementById('newNameInput').value = ""; renderNames(); saveNames(); }
-}
-async function saveNames() {
-    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.namePath}`;
-    const res = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` }});
-    const file = await res.json();
-    const payload = btoa(unescape(encodeURIComponent(JSON.stringify(TEAM_NAMES))));
-    await fetch(url, { method: 'PUT', headers: { 'Authorization': `token ${GITHUB_TOKEN}` }, body: JSON.stringify({ message: "Names Update", content: payload, sha: file.sha }) });
-}
-
-window.onload = () => { loadData(); setInterval(() => { document.getElementById('liveClock').innerText = "🕒 " + new Date().toLocaleTimeString(); }, 1000); };
+window.onload = () => { startClock(); loadData(); };
 </script>
 </body>
 </html>
